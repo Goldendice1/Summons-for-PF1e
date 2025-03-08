@@ -1,0 +1,79 @@
+{
+  "id": "summons-for-pf1e",
+  "title": "Summons for PF1e",
+  "version": "0.1.3",
+  "compatibility": {
+    "minimum": "12",
+    "verified": "12"
+  },
+  "relationships": {
+    "systems": [
+      {
+        "id": "pf1",
+        "type": "system",
+        "compatibility": {}
+      }
+    ],
+    "recommends": [
+      {
+        "id": "portal-lib",
+        "type": "module",
+        "compatibility": {}
+      }
+    ]
+  },
+  "description": "Summonable Monster Compendium (work in progress)",
+  "authors": [
+    {
+      "name": "Goldendice",
+      "discord": "Goldendice",
+      "flags": {}
+    }
+  ],
+  "packs": [
+    {
+      "name": "summon-minor-monster",
+      "label": "Summon Minor Monster",
+      "path": "packs/summon-minor-monster",
+      "type": "Actor",
+      "system": "pf1",
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      }
+    },
+    {
+      "name": "summon-monster-i",
+      "label": "Summon Monster I",
+      "path": "packs/summon-monster-i",
+      "type": "Actor",
+      "system": "pf1",
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      }
+    },
+    {
+      "name": "summon-monster-ii",
+      "label": "Summon Monster II",
+      "path": "packs/summon-monster-ii",
+      "type": "Actor",
+      "system": "pf1",
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      }
+    },
+    {
+      "name": "summon-templates",
+      "label": "Summon Templates",
+      "path": "packs/summon-templates",
+      "type": "Item",
+      "system": "pf1",
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      }
+    }
+  ]
+}
