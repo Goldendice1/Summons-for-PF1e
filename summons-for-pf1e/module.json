@@ -75,5 +75,8 @@
         "ASSISTANT": "OWNER"
       }
     }
-  ]
+  ],
+  "url": "https://github.com/Goldendice1/Summons-for-PF1e",
+  "download": "https://github.com/Goldendice1/Summons-for-PF1e/archive/refs/tags/v0.1.1-beta-fix.zip",
+  "manifest": "https://github.com/theripper93/portal-lib/releases/download/2.2.15/module.json"
 }
