@@ -1,0 +1,7 @@
+2026/02/12-19:32:57.456 5fd8 Recovering log #349
+2026/02/12-19:32:57.467 5fd8 Delete type=0 #349
+2026/02/12-19:32:57.467 5fd8 Delete type=3 #347
+2026/02/12-19:33:04.657 5574 Level-0 table #354: started
+2026/02/12-19:33:04.657 5574 Level-0 table #354: 0 bytes OK
+2026/02/12-19:33:04.672 5574 Delete type=0 #352
+2026/02/12-19:33:04.673 5574 Manual compaction at level-0 from '!actors!2bHEpXHMzy07yjkn' @ 72057594037927935 : 1 .. '!actors.items!tnUL2S93giZkFxXa.yN5lv9Jv5AgluKL6' @ 0 : 0; will stop at (end)
