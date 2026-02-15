@@ -1,0 +1,42 @@
+{
+  "SUMMON": {
+    "Settings": {
+      "PackSource": {
+        "Name": "Summon Pack Sources",
+        "Hint": "Comma-separated list of package names containing summon actors (e.g., 'summons-for-pf1e')"
+      },
+      "PackTemplateSource": {
+        "Name": "Template Pack Source",
+        "Hint": "Pack containing summon templates (e.g., 'summons-for-pf1e.summon-templates')"
+      },
+      "DestinationFolder": {
+        "Name": "Destination Folder",
+        "Hint": "Folder name where summoned actors will be stored"
+      },
+      "UseUserLinkedActorOnly": {
+        "Name": "Use User Linked Actor Only",
+        "Hint": "If enabled, non-GM users can only summon using their assigned character"
+      },
+      "EnableAugmentSummoning": {
+        "Name": "Enable Augment Summoning",
+        "Hint": "Show Augment Summoning checkbox in the summon dialog"
+      },
+      "EnableExtendMetamagic": {
+        "Name": "Enable Extend Metamagic",
+        "Hint": "Show Extend Metamagic checkbox in the summon dialog"
+      },
+      "EnableReachMetamagic": {
+        "Name": "Enable Reach Metamagic",
+        "Hint": "Show Reach Metamagic checkbox in the summon dialog"
+      },
+      "EnableConjuredArmor": {
+        "Name": "Enable Conjured Armor",
+        "Hint": "Show Conjured Armor checkbox for psychic casters"
+      },
+      "EnableHarrowedSummoning": {
+        "Name": "Enable Harrowed Summoning",
+        "Hint": "Show Harrowed Summoning options in the summon dialog"
+      }
+    }
+  }
+}

@@ -1,0 +1,66 @@
+/**
+ * Summons for PF1e Module Styles
+ */
+
+.summon-monster-dialog {
+  min-width: 400px;
+}
+
+.summon-monster-dialog .form-group {
+  margin-bottom: 0.5em;
+}
+
+.summon-monster-dialog .form-group label {
+  font-weight: bold;
+  margin-bottom: 0.25em;
+  display: block;
+}
+
+.summon-monster-dialog .form-group input[type="text"],
+.summon-monster-dialog .form-group input[type="number"],
+.summon-monster-dialog .form-group select {
+  width: 100%;
+}
+
+.summon-monster-dialog .form-group input[type="checkbox"] {
+  margin-right: 0.5em;
+}
+
+.summon-monster-dialog fieldset {
+  margin-top: 1em;
+  border: 1px solid #888;
+  border-radius: 4px;
+  padding: 0.5em;
+}
+
+.summon-monster-dialog fieldset legend {
+  font-weight: bold;
+  padding: 0 0.5em;
+}
+
+/* Chat card styling for summon messages */
+.pf1.chat-card .summon-delete-placeholder,
+.pf1.chat-card button {
+  margin-top: 0.5em;
+}
+
+.pf1.chat-card button {
+  padding: 0.25em 0.5em;
+  border: 1px solid #999;
+  border-radius: 3px;
+  background: #f0f0f0;
+  cursor: pointer;
+}
+
+.pf1.chat-card button:hover {
+  background: #e0e0e0;
+}
+
+.pf1.chat-card button i {
+  margin-right: 0.25em;
+}
+
+/* Header button styling */
+.sheet-header .summon-monster {
+  flex: 0;
+}
