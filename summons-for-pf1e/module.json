@@ -1,10 +1,10 @@
 {
   "id": "summons-for-pf1e",
   "title": "Summons for PF1e",
-  "version": "0.1.3",
+  "version": "0.2.3",
   "compatibility": {
     "minimum": "12",
-    "verified": "12"
+    "verified": "13"
   },
   "relationships": {
     "systems": [
@@ -22,7 +22,7 @@
       }
     ]
   },
-  "description": "Summonable Monster Compendium (work in progress)",
+  "description": "<p>Summonable Monster Compendium</p>",
   "authors": [
     {
       "name": "Goldendice",
@@ -74,9 +74,118 @@
         "PLAYER": "OBSERVER",
         "ASSISTANT": "OWNER"
       }
+    },
+    {
+      "name": "summon-monster-iii",
+      "label": "Summon Monster III",
+      "path": "packs/summon-monster-iii",
+      "type": "Actor",
+      "system": "pf1",
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      }
+    },
+    {
+      "name": "summon-macros",
+      "label": "Summon Macros",
+      "path": "packs/summon-macros",
+      "type": "Macro",
+      "system": "pf1",
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      }
+    },
+    {
+      "name": "summon-monster-iv",
+      "label": "Summon Monster IV",
+      "path": "packs/summon-monster-iv",
+      "type": "Actor",
+      "system": "pf1",
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      }
+    },
+    {
+      "name": "summon-monster-v",
+      "label": "Summon Monster V",
+      "path": "packs/summon-monster-v",
+      "type": "Actor",
+      "system": "pf1",
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      }
+    },
+    {
+      "name": "summon-monster-vi",
+      "label": "Summon Monster VI",
+      "path": "packs/summon-monster-vi",
+      "type": "Actor",
+      "system": "pf1",
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      }
+    },
+    {
+      "name": "summon-monster-vii",
+      "label": "Summon Monster VII",
+      "path": "packs/summon-monster-vii",
+      "type": "Actor",
+      "system": "pf1",
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      }
+    },
+    {
+      "name": "summon-monster-viii",
+      "label": "Summon Monster VIII",
+      "path": "packs/summon-monster-viii",
+      "type": "Actor",
+      "system": "pf1",
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      }
+    },
+    {
+      "name": "summon-monster-ix",
+      "label": "Summon Monster IX",
+      "path": "packs/summon-monster-ix",
+      "type": "Actor",
+      "system": "pf1",
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      }
+    }
+  ],
+  "packFolders": [
+    {
+      "name": "Summons for PF1e",
+      "sorting": "m",
+      "packs": [
+        "summon-macros",
+        "summon-templates",
+        "summon-minor-monster",
+        "summon-monster-i",
+        "summon-monster-ii",
+        "summon-monster-iii",
+        "summon-monster-iv",
+        "summon-monster-v",
+        "summon-monster-vi",
+        "summon-monster-vii",
+        "summon-monster-viii",
+        "summon-monster-ix"
+      ],
+      "color": null,
+      "folders": []
     }
   ],
   "url": "https://github.com/Goldendice1/Summons-for-PF1e",
-   "manifest": "https://github.com/Goldendice1/Summons-for-PF1e/releases/latest/download/module.json",
-  
+  "flags": {}
 }
