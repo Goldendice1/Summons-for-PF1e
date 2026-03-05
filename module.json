@@ -87,17 +87,6 @@
       }
     },
     {
-      "name": "summon-macros",
-      "label": "Summon Macros",
-      "path": "packs/summon-macros",
-      "type": "Macro",
-      "system": "pf1",
-      "ownership": {
-        "PLAYER": "OBSERVER",
-        "ASSISTANT": "OWNER"
-      }
-    },
-    {
       "name": "summon-monster-iv",
       "label": "Summon Monster IV",
       "path": "packs/summon-monster-iv",
