@@ -87,17 +87,6 @@
       }
     },
     {
-      "name": "summon-macros",
-      "label": "Summon Macros",
-      "path": "packs/summon-macros",
-      "type": "Macro",
-      "system": "pf1",
-      "ownership": {
-        "PLAYER": "OBSERVER",
-        "ASSISTANT": "OWNER"
-      }
-    },
-    {
       "name": "summon-monster-iv",
       "label": "Summon Monster IV",
       "path": "packs/summon-monster-iv",
@@ -187,7 +176,7 @@
     }
   ],
   "url": "https://github.com/Goldendice1/Summons-for-PF1e",
-  "manifest": "https://raw.githubusercontent.com/Goldendice1/Summons-for-PF1e/main/module.json",
-  "download": "https://github.com/Goldendice1/Summons-for-PF1e/archive/refs/heads/main.zip",
+  "manifest": "https://raw.githubusercontent.com/Goldendice1/Summons-for-PF1e/fix_manifest/module.json",
+  "download": "https://github.com/Goldendice1/Summons-for-PF1e/archive/refs/heads/fix_manifest.zip",
   "flags": {}
 }
