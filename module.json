@@ -176,7 +176,7 @@
     }
   ],
   "url": "https://github.com/Goldendice1/Summons-for-PF1e",
-  "manifest": "https://raw.githubusercontent.com/Goldendice1/Summons-for-PF1e/fix_manifest/module.json",
-  "download": "https://github.com/Goldendice1/Summons-for-PF1e/archive/refs/heads/fix_manifest.zip",
+  "manifest": "https://raw.githubusercontent.com/Goldendice1/Summons-for-PF1e/fix_missing_summons/module.json",
+  "download": "https://github.com/Goldendice1/Summons-for-PF1e/archive/refs/heads/fix_missing_summons.zip",
   "flags": {}
 }
