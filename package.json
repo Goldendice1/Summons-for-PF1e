@@ -6,6 +6,7 @@
     "test:watch": "vitest"
   },
   "devDependencies": {
+    "@vitest/coverage-v8": "^2.0.0",
     "vitest": "^2.0.0"
   }
 }

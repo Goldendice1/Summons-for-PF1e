@@ -5,5 +5,10 @@ export default defineConfig({
         setupFiles: ['./tests/setup.js'],
         environment: 'node',
         globals: true,
+        coverage: {
+            provider: 'v8',
+            include: ['scripts/**/*.js'],
+            reporter: ['text', 'json-summary'],
+        },
     }
 });

@@ -13,4 +13,25 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
-      - run: npm test
+      - run: npm test -- --coverage
+      - name: Write coverage summary
+        if: always()
+        run: |
+          node -e "
+          const fs = require('fs');
+          const s = JSON.parse(fs.readFileSync('coverage/coverage-summary.json'));
+          const fmt = (v) => v === undefined ? 'N/A' : v.toFixed(1) + '%';
+          const row = (label, d) =>
+            \`| \${label} | \${fmt(d.lines.pct)} | \${fmt(d.statements.pct)} | \${fmt(d.functions.pct)} | \${fmt(d.branches.pct)} |\`;
+          const files = Object.entries(s)
+            .filter(([k]) => k !== 'total')
+            .map(([k, v]) => row(k.replace('scripts/', ''), v));
+          const md = [
+            '## Test Coverage',
+            '| File | Lines | Statements | Functions | Branches |',
+            '|------|------:|----------:|---------:|---------:|',
+            row('**Total**', s.total),
+            ...files,
+          ].join('\n');
+          fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, md + '\n');
+          "
