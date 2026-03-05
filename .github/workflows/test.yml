@@ -6,6 +6,8 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -14,24 +16,35 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm test -- --coverage
-      - name: Write coverage summary
+      - name: Comment coverage on PR
         if: always()
-        run: |
-          node -e "
-          const fs = require('fs');
-          const s = JSON.parse(fs.readFileSync('coverage/coverage-summary.json'));
-          const fmt = (v) => v === undefined ? 'N/A' : v.toFixed(1) + '%';
-          const row = (label, d) =>
-            \`| \${label} | \${fmt(d.lines.pct)} | \${fmt(d.statements.pct)} | \${fmt(d.functions.pct)} | \${fmt(d.branches.pct)} |\`;
-          const files = Object.entries(s)
-            .filter(([k]) => k !== 'total')
-            .map(([k, v]) => row(k.replace('scripts/', ''), v));
-          const md = [
-            '## Test Coverage',
-            '| File | Lines | Statements | Functions | Branches |',
-            '|------|------:|----------:|---------:|---------:|',
-            row('**Total**', s.total),
-            ...files,
-          ].join('\n');
-          fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, md + '\n');
-          "
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            const summaryPath = 'coverage/coverage-summary.json';
+            if (!fs.existsSync(summaryPath)) {
+              console.log('No coverage summary found; skipping comment.');
+              return;
+            }
+            const s = JSON.parse(fs.readFileSync(summaryPath));
+            const fmt = (v) => v === undefined ? 'N/A' : v.toFixed(1) + '%';
+            const row = (label, d) =>
+              `| ${label} | ${fmt(d.lines.pct)} | ${fmt(d.statements.pct)} | ${fmt(d.functions.pct)} | ${fmt(d.branches.pct)} |`;
+            const files = Object.entries(s)
+              .filter(([k]) => k !== 'total')
+              .map(([k, v]) => row(path.relative(process.cwd(), k).replace(/\\/g, '/'), v));
+            const body = [
+              '## Test Coverage',
+              '| File | Lines | Statements | Functions | Branches |',
+              '|------|------:|----------:|---------:|---------:|',
+              row('**Total**', s.total),
+              ...files,
+            ].join('\n');
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body,
+            });
