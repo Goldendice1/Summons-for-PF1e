@@ -178,5 +178,6 @@
   "url": "https://github.com/Goldendice1/Summons-for-PF1e",
   "manifest": "https://raw.githubusercontent.com/Goldendice1/Summons-for-PF1e/main/module.json",
   "download": "https://github.com/Goldendice1/Summons-for-PF1e/archive/refs/heads/main.zip",
+  "esmodules": ["scripts/main.js"],
   "flags": {}
 }
