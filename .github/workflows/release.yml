@@ -30,6 +30,14 @@ jobs:
              '.version = $version | .download = $download' \
              module.json > module.json.tmp && mv module.json.tmp module.json
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Run tests
+        run: npm ci && npm test
+
       - name: Build package
         run: bash package.sh
 
