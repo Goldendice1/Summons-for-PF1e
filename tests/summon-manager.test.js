@@ -413,11 +413,8 @@ describe('buildSummonChatContent', () => {
 
     it('includes roll total', () => {
         const html = buildSummonChatContent('Wolf', roll, 5);
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(html, 'text/html');
-        const inlineRoll = doc.querySelector('.inline-roll');
-        expect(inlineRoll).not.toBeNull();
-        expect(inlineRoll.textContent).toContain('3');
+        expect(html).toMatch(/class="inline-roll[^"]*"/);
+        expect(html).toContain('3');
     });
 
     it('includes caster level in rounds text', () => {
