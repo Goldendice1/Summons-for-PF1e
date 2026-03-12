@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { ExpirationTracker } from '../scripts/expiration-tracker.js';
 
 function makeBuffItem(overrides = {}) {
@@ -17,6 +17,7 @@ describe('ExpirationTracker — buff expiration hook', () => {
     let updateItem;
 
     beforeEach(() => {
+        vi.useFakeTimers();
         vi.clearAllMocks();
 
         delete global.window._summonBuffExpirationHookId;
@@ -31,6 +32,10 @@ describe('ExpirationTracker — buff expiration hook', () => {
         global.game.actors.get = vi.fn().mockReturnValue(null);
 
         ExpirationTracker._registerBuffExpirationHook();
+    });
+
+    afterEach(() => {
+        vi.useRealTimers();
     });
 
     it('does nothing when user is not GM', async () => {
@@ -73,7 +78,8 @@ describe('ExpirationTracker — buff expiration hook', () => {
 
     it('triggers deletion and posts expiry message when Summoned buff deactivates on a summon', async () => {
         global.game.user.isGM = true;
-        await updateItem(makeBuffItem(), { system: { active: false } });
+        updateItem(makeBuffItem(), { system: { active: false } });
+        await vi.runAllTimersAsync();
         expect(global.ChatMessage.create).toHaveBeenCalledOnce();
         expect(global.ChatMessage.create.mock.calls[0][0].content).toContain('Summon Expired');
     });

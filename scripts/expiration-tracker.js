@@ -8,7 +8,7 @@ export class ExpirationTracker {
 
     static _registerBuffExpirationHook() {
         if (!window._summonBuffExpirationHookId) {
-            window._summonBuffExpirationHookId = Hooks.on("updateItem", async (item, changes) => {
+            window._summonBuffExpirationHookId = Hooks.on("updateItem", (item, changes) => {
                 if (!game.user.isGM) return;
                 if (item.type !== "buff" || item.name !== "Summoned") return;
                 if (changes.system?.active !== false) return;
@@ -16,7 +16,10 @@ export class ExpirationTracker {
                 const actor = item.parent;
                 if (!actor?.getFlag("summons-for-pf1e", "isSummon")) return;
 
-                await ExpirationTracker._deleteSummon(actor.id);
+                // Defer deletion so PF1e can finish its own updateItem processing
+                // before the token is removed (otherwise PF1e errors accessing
+                // the synthetic actor's token after we've deleted it).
+                setTimeout(() => ExpirationTracker._deleteSummon(actor.id), 0);
             });
         }
     }
