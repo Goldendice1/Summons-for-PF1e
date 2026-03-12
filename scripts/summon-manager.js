@@ -606,6 +606,19 @@ export class SummonManager {
 }
 
 /**
+ * Escape a string for safe embedding in HTML text content or attribute values.
+ * @param {string} str
+ * @returns {string}
+ */
+function escapeHtml(str) {
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+}
+
+/**
  * Build the HTML content for a summon chat message.
  * Pure function — no Foundry API dependencies.
  * @param {string} monsterName
@@ -620,9 +633,9 @@ export function buildSummonChatContent(monsterName, roll, casterLevel) {
                 <h3 class="actor-name">Summoning!</h3>
             </header>
             <div class="result-text">
-                <p><a class="inline-roll inline-result" title="${roll.formula}" data-roll="${encodeURIComponent(JSON.stringify(roll))}">
+                <p><a class="inline-roll inline-result" title="${escapeHtml(roll.formula)}" data-roll="${encodeURIComponent(JSON.stringify(roll))}">
                     <i class="fas fa-dice-d20"></i> ${roll.total}
-                </a> ${monsterName} summoned for ${casterLevel} rounds.</p>
+                </a> ${escapeHtml(monsterName)} summoned for ${casterLevel} rounds.</p>
             </div>
         </div>`;
 }
