@@ -12,12 +12,13 @@ export class ExpirationTracker {
     static _registerCombatHook() {
         if (!window._summonExpirationHookId) {
             window._summonExpirationHookId = Hooks.on("updateCombat", async (combat, changed, options, userId) => {
+                if (!game.user.isGM) return;
                 if (!combat) {
                     console.debug("[SummonMonster] updateCombat hook called with null combat - skipping");
                     return;
                 }
                 if (!("round" in changed || "turn" in changed)) return;
-                
+
                 for (let actor of game.actors.contents) {
                     let expirations = actor.getFlag("world", "summonExpirations");
                     if (!Array.isArray(expirations) || !expirations.length) continue;
@@ -68,6 +69,7 @@ export class ExpirationTracker {
     static _registerWorldTimeHook() {
         if (!window._summonWorldTimeHookId) {
             window._summonWorldTimeHookId = Hooks.on("updateWorldTime", async (worldTime, dt) => {
+                if (!game.user.isGM) return;
                 console.debug("[SummonMonster] updateWorldTime hook fired: worldTime=", worldTime, "dt=", dt);
                 
                 for (let actor of game.actors.contents) {
