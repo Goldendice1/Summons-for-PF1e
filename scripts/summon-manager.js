@@ -601,7 +601,20 @@ export class SummonManager {
     }
 
     _createChatMessage(roll, casterLevel) {
-        const msg = `
+        ChatMessage.create({ content: buildSummonChatContent(this.createdMonster.name, roll, casterLevel) });
+    }
+}
+
+/**
+ * Build the HTML content for a summon chat message.
+ * Pure function — no Foundry API dependencies.
+ * @param {string} monsterName
+ * @param {{formula: string, total: number}} roll
+ * @param {number} casterLevel
+ * @returns {string}
+ */
+export function buildSummonChatContent(monsterName, roll, casterLevel) {
+    return `
         <div class="pf1 chat-card">
             <header class="card-header flexrow">
                 <h3 class="actor-name">Summoning!</h3>
@@ -609,10 +622,7 @@ export class SummonManager {
             <div class="result-text">
                 <p><a class="inline-roll inline-result" title="${roll.formula}" data-roll="${encodeURI(JSON.stringify(roll))}">
                     <i class="fas fa-dice-d20"></i> ${roll.total}
-                </a> ${this.createdMonster.name} summoned for ${casterLevel} rounds.</p>
+                </a> ${monsterName} summoned for ${casterLevel} rounds.</p>
             </div>
         </div>`;
-
-        ChatMessage.create({ content: msg });
-    }
 }

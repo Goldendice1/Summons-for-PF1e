@@ -60,57 +60,68 @@ Hooks.on('getActorSheetHeaderButtons', (sheet, buttons) => {
 });
 
 /**
+ * Determine the summoner actor and token from canvas/user state.
+ * Pure function — no Foundry API side effects.
+ * @returns {{ valid: true, actor: Actor, token: Token } | { valid: false, error: string }}
+ */
+export function validateSummonerTarget({ isGM, useUserLinkedActorOnly, actor, character, controlledTokens, placeableTokens, ownedTokens }) {
+    let summonerActor = actor;
+    let summonerToken;
+
+    if (isGM || !useUserLinkedActorOnly) {
+        if (!summonerActor) {
+            if (!controlledTokens.length) {
+                return { valid: false, error: "No token chosen as summoner." };
+            }
+            summonerToken = controlledTokens[0];
+            summonerActor = summonerToken.actor;
+        } else {
+            const tokens = placeableTokens.filter(t => t.actor && t.actor.id === summonerActor.id);
+            if (tokens.length > 0) {
+                summonerToken = tokens[0];
+            } else {
+                return { valid: false, error: `No token for ${summonerActor.name} found on the canvas.` };
+            }
+        }
+    } else {
+        summonerActor = summonerActor || character;
+        if (!summonerActor) {
+            return { valid: false, error: "No token chosen as summoner." };
+        }
+        const filtered = ownedTokens.filter(o => o.actor && o.actor.id === summonerActor.id);
+        if (!filtered.length) {
+            return { valid: false, error: `No token of summoner ${summonerActor.name} available.` };
+        }
+        summonerToken = filtered[0];
+    }
+
+    return { valid: true, actor: summonerActor, token: summonerToken };
+}
+
+/**
  * Open the summon dialog
  * @param {Actor} actor - Optional actor to use as summoner
  */
 export function openSummonDialog(actor = null) {
     const config = getConfig();
-    
-    let summonerActor = actor;
-    let summonerToken;
-    
-    if (game.user.isGM || !config.useUserLinkedActorOnly) {
-        // GMs must have a token selected
-        if (!summonerActor) {
-            let selectedTokens = canvas.tokens.controlled;
-            if (!selectedTokens.length) {
-                ui.notifications.warn("No token chosen as summoner.");
-                return;
-            }
-            summonerToken = selectedTokens[0];
-            summonerActor = summonerToken.actor;
-        } else {
-            // Find token for the actor
-            let tokens = canvas.tokens.placeables.filter(t => t.actor && t.actor.id === summonerActor.id);
-            if (tokens.length > 0) {
-                summonerToken = tokens[0];
-            } else {
-                ui.notifications.warn(`No token for ${summonerActor.name} found on the canvas.`);
-                return;
-            }
-        }
-    } else {
-        // Non-GMs must have a character and a token for that character on the map
-        summonerActor = summonerActor || game.user.character;
-        if (!summonerActor) {
-            ui.notifications.warn("No token chosen as summoner.");
-            return;
-        }
-        
-        let ownedTokens = canvas.tokens.ownedTokens.filter(
-            o => o.actor && o.actor.id === summonerActor.id
-        );
-        if (!ownedTokens.length) {
-            ui.notifications.warn(`No token of summoner ${summonerActor.name} available.`);
-            return;
-        }
-        summonerToken = ownedTokens[0];
+
+    const result = validateSummonerTarget({
+        isGM: game.user.isGM,
+        useUserLinkedActorOnly: config.useUserLinkedActorOnly,
+        actor,
+        character: game.user.character,
+        controlledTokens: canvas.tokens.controlled,
+        placeableTokens: canvas.tokens.placeables,
+        ownedTokens: canvas.tokens.ownedTokens,
+    });
+
+    if (!result.valid) {
+        ui.notifications.warn(result.error);
+        return;
     }
-    
-    if (summonerActor && summonerToken) {
-        const dialog = new SummonDialog(summonerActor, summonerToken);
-        dialog.render(true);
-    }
+
+    const dialog = new SummonDialog(result.actor, result.token);
+    dialog.render(true);
 }
 
 
