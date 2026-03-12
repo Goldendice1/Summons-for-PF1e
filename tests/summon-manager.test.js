@@ -52,7 +52,7 @@ function makeHtml({
                 case '#harrowMatch': return harrowValue !== null ? [{ value: harrowValue }] : [];
                 case '#reachCheck': return reachChecked ? [{ checked: true }] : [{ checked: false }];
                 case '#augmentCheck': return augmentChecked ? [{ checked: true }] : [{ checked: false }];
-                case '#harrow1': return harrow1Val !== '' ? [{ value: harrow1Val }] : [];
+                case '#harrow1': return [{ value: harrow1Val }];
                 case '#harrow2': return [{ value: harrow2Val }];
                 case '#conjuredArmorCheck': return conjuredArmorChecked ? [{ checked: true }] : [{ checked: false }];
                 case '#summonCount': return { val: () => summonCount };
