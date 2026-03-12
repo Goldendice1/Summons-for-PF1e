@@ -26,10 +26,24 @@ A comprehensive Foundry VTT module for automating creature summoning in the Path
 
 ## Installation
 
-1. Download the module from the releases page
+**Via Foundry's module installer (recommended):**
+
+1. In Foundry, go to **Add-on Modules → Install Module**
+2. Paste the manifest URL:
+   ```
+   https://github.com/Goldendice1/Summons-for-PF1e/releases/latest/download/module.json
+   ```
+3. Click **Install**, then enable the module in your world
+
+**Manual install:**
+
+1. Download the zip from the [latest release](https://github.com/Goldendice1/Summons-for-PF1e/releases/latest)
 2. Extract to your Foundry `modules` folder
 3. Enable the module in your world
-4. Configure settings in the module settings menu
+
+## Releases
+
+Releases are published on the [GitHub Releases page](https://github.com/Goldendice1/Summons-for-PF1e/releases). Each release attaches a versioned zip and a `module.json` manifest. Foundry's built-in updater will detect new releases automatically via the manifest URL above.
 
 ## Usage
 
@@ -88,6 +102,31 @@ The module automatically tracks summon durations:
 - **Combat Transitions**: Durations are automatically converted when combat ends
 
 When a summon expires, a chat message is posted with a delete button to clean up the creature.
+
+## For Developers
+
+### Cutting a Release
+
+Releases are driven by git tags. To publish a new version:
+
+```bash
+git tag v1.1.0
+git push origin v1.1.0
+```
+
+The [release workflow](.github/workflows/release.yml) will automatically:
+1. Stamp the tag's version number and a versioned download URL into `module.json`
+2. Build a zip containing all module files (scripts, styles, lang, packs, etc.)
+3. Create a GitHub Release with the zip and `module.json` attached as assets
+
+Foundry users will see the update the next time they check for module updates.
+
+### Running Tests
+
+```bash
+npm ci
+npm test
+```
 
 ## Credits
 
