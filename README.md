@@ -103,6 +103,31 @@ The module automatically tracks summon durations:
 
 When a summon expires, a chat message is posted with a delete button to clean up the creature.
 
+## For Developers
+
+### Cutting a Release
+
+Releases are driven by git tags. To publish a new version:
+
+```bash
+git tag v1.1.0
+git push origin v1.1.0
+```
+
+The [release workflow](.github/workflows/release.yml) will automatically:
+1. Stamp the tag's version number and a versioned download URL into `module.json`
+2. Build a zip containing all module files (scripts, styles, lang, packs, etc.)
+3. Create a GitHub Release with the zip and `module.json` attached as assets
+
+Foundry users will see the update the next time they check for module updates.
+
+### Running Tests
+
+```bash
+npm ci
+npm test
+```
+
 ## Credits
 
 Based on the original Summon Monster macro for PF1e.
