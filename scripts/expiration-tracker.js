@@ -12,12 +12,13 @@ export class ExpirationTracker {
     static _registerCombatHook() {
         if (!window._summonExpirationHookId) {
             window._summonExpirationHookId = Hooks.on("updateCombat", async (combat, changed, options, userId) => {
+                if (!game.user.isGM) return;
                 if (!combat) {
                     console.debug("[SummonMonster] updateCombat hook called with null combat - skipping");
                     return;
                 }
                 if (!("round" in changed || "turn" in changed)) return;
-                
+
                 for (let actor of game.actors.contents) {
                     let expirations = actor.getFlag("world", "summonExpirations");
                     if (!Array.isArray(expirations) || !expirations.length) continue;
@@ -34,18 +35,14 @@ export class ExpirationTracker {
                         let buttonHtml = `<span class='summon-delete-placeholder' data-actor-id='${actorId}' data-summoner-id='${actor.id}'></span>`;
                         
                         if (tokenIds.length === 0) {
-                            if (game.user.isGM) {
-                                ChatMessage.create({
-                                    content: `<div class="pf1 chat-card"><header class="card-header flexrow"><h3 class="actor-name">Summon Expired</h3></header><div class="result-text"><p>The summon duration has expired (all tokens defeated). ${buttonHtml}</p></div></div>`
-                                });
-                            }
+                            ChatMessage.create({
+                                content: `<div class="pf1 chat-card"><header class="card-header flexrow"><h3 class="actor-name">Summon Expired</h3></header><div class="result-text"><p>The summon duration has expired (all tokens defeated). ${buttonHtml}</p></div></div>`
+                            });
                             changedFlag = true;
                         } else if (combat.round === expireRound && combat.turns[combat.turn] && tokenIds.includes(combat.turns[combat.turn].tokenId)) {
-                            if (game.user.isGM) {
-                                ChatMessage.create({
-                                    content: `<div class="pf1 chat-card"><header class="card-header flexrow"><h3 class="actor-name">Summon Expired</h3></header><div class="result-text"><p>The summon duration has expired. ${buttonHtml}</p></div></div>`
-                                });
-                            }
+                            ChatMessage.create({
+                                content: `<div class="pf1 chat-card"><header class="card-header flexrow"><h3 class="actor-name">Summon Expired</h3></header><div class="result-text"><p>The summon duration has expired. ${buttonHtml}</p></div></div>`
+                            });
                             changedFlag = true;
                         }
                     }
@@ -72,6 +69,7 @@ export class ExpirationTracker {
     static _registerWorldTimeHook() {
         if (!window._summonWorldTimeHookId) {
             window._summonWorldTimeHookId = Hooks.on("updateWorldTime", async (worldTime, dt) => {
+                if (!game.user.isGM) return;
                 console.debug("[SummonMonster] updateWorldTime hook fired: worldTime=", worldTime, "dt=", dt);
                 
                 for (let actor of game.actors.contents) {
@@ -128,11 +126,9 @@ export class ExpirationTracker {
                             );
                             
                             if (!messagePosted) {
-                                if (game.user.isGM) {
-                                    let buttonHtml = `<span class='summon-delete-placeholder' data-actor-id='${actorId}' data-summoner-id='${actor.id}'></span>`;
-                                    let chatCard = `<div class="pf1 chat-card"><header class="card-header flexrow"><h3 class="actor-name">Summon Expired</h3></header><div class="result-text"><p>The summon duration has expired. ${buttonHtml}</p></div></div>`;
-                                    ChatMessage.create({ content: chatCard });
-                                }
+                                let buttonHtml = `<span class='summon-delete-placeholder' data-actor-id='${actorId}' data-summoner-id='${actor.id}'></span>`;
+                                let chatCard = `<div class="pf1 chat-card"><header class="card-header flexrow"><h3 class="actor-name">Summon Expired</h3></header><div class="result-text"><p>The summon duration has expired. ${buttonHtml}</p></div></div>`;
+                                ChatMessage.create({ content: chatCard });
                                 messagePosted = true;
                             }
                         } else {
