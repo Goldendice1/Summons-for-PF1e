@@ -25,6 +25,16 @@ export class ExpirationTracker {
     }
 
     static async _deleteSummon(actorId) {
+        const summonedActor = game.actors.get(actorId);
+        const tokens = canvas.tokens.placeables.filter(t => t.actor?.id === actorId);
+
+        // Close open sheets before deleting so they don't try to submit to a
+        // missing document when the user closes them afterward.
+        if (summonedActor?.sheet?.rendered) await summonedActor.sheet.close({ force: true });
+        for (const token of tokens) {
+            if (token.actor?.sheet?.rendered) await token.actor.sheet.close({ force: true });
+        }
+
         // Remove combatants
         if (game.combat) {
             const toDelete = game.combat.combatants.filter(c => c.actorId === actorId);
@@ -34,7 +44,6 @@ export class ExpirationTracker {
         }
 
         // Delete tokens
-        const tokens = canvas.tokens.placeables.filter(t => t.actor?.id === actorId);
         if (tokens.length) {
             const tokenIds = tokens.map(t => t.document.id);
             try {
@@ -47,7 +56,6 @@ export class ExpirationTracker {
         }
 
         // Delete the summoned actor
-        const summonedActor = game.actors.get(actorId);
         if (summonedActor) {
             await summonedActor.delete();
         }
