@@ -13,7 +13,7 @@ global.game = {
 };
 
 global.canvas = {
-    tokens: { placeables: [], get: vi.fn(() => null) },
+    tokens: { placeables: [], controlled: [], ownedTokens: [], get: vi.fn(() => null) },
     scene: null,
 };
 
@@ -50,6 +50,10 @@ global.ChatMessage = {
 
 global.Folder = {
     create: vi.fn(async () => ({ id: 'test-folder-id' })),
+};
+
+global.Dialog = class {
+    constructor() {}
 };
 
 global.Hooks = {
