@@ -26,7 +26,7 @@ jobs:
           TAG=${{ steps.version.outputs.tag }}
           VERSION=${{ steps.version.outputs.version }}
           jq --arg version "$VERSION" \
-             --arg download "https://github.com/Goldendice1/Summons-for-PF1e/releases/download/${TAG}/summons-for-pf1e.zip" \
+             --arg download "https://github.com/Goldendice1/Summons-for-PF1e/releases/download/${TAG}/summons-for-pf1e-v${VERSION}.zip" \
              '.version = $version | .download = $download' \
              module.json > module.json.tmp && mv module.json.tmp module.json
 
