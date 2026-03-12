@@ -413,7 +413,11 @@ describe('buildSummonChatContent', () => {
 
     it('includes roll total', () => {
         const html = buildSummonChatContent('Wolf', roll, 5);
-        expect(html).toContain('3');
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const inlineRoll = doc.querySelector('.inline-roll');
+        expect(inlineRoll).not.toBeNull();
+        expect(inlineRoll.textContent).toContain('3');
     });
 
     it('includes caster level in rounds text', () => {
@@ -423,7 +427,7 @@ describe('buildSummonChatContent', () => {
 
     it('includes roll formula in title attribute', () => {
         const html = buildSummonChatContent('Wolf', roll, 5);
-        expect(html).toContain('1d4');
+        expect(html).toContain('title="1d4"');
     });
 });
 
