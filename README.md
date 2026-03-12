@@ -26,10 +26,24 @@ A comprehensive Foundry VTT module for automating creature summoning in the Path
 
 ## Installation
 
-1. Download the module from the releases page
+**Via Foundry's module installer (recommended):**
+
+1. In Foundry, go to **Add-on Modules → Install Module**
+2. Paste the manifest URL:
+   ```
+   https://github.com/Goldendice1/Summons-for-PF1e/releases/latest/download/module.json
+   ```
+3. Click **Install**, then enable the module in your world
+
+**Manual install:**
+
+1. Download the zip from the [latest release](https://github.com/Goldendice1/Summons-for-PF1e/releases/latest)
 2. Extract to your Foundry `modules` folder
 3. Enable the module in your world
-4. Configure settings in the module settings menu
+
+## Releases
+
+Releases are published on the [GitHub Releases page](https://github.com/Goldendice1/Summons-for-PF1e/releases). Each release attaches a versioned zip and a `module.json` manifest. Foundry's built-in updater will detect new releases automatically via the manifest URL above.
 
 ## Usage
 
