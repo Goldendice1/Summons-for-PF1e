@@ -526,6 +526,55 @@ describe('_applyHarrowBuff', () => {
     });
 });
 
+// ── _applySummonDurationBuff ──────────────────────────────────────────────────
+
+describe('_applySummonDurationBuff', () => {
+    function makeManagerWithMonster() {
+        const manager = makeManager();
+        manager.createdMonster = {
+            setFlag: vi.fn().mockResolvedValue(undefined),
+            createEmbeddedDocuments: vi.fn().mockResolvedValue([]),
+        };
+        return manager;
+    }
+
+    it('flags the actor as isSummon', async () => {
+        const manager = makeManagerWithMonster();
+        await manager._applySummonDurationBuff(5);
+        expect(manager.createdMonster.setFlag).toHaveBeenCalledWith('summons-for-pf1e', 'isSummon', true);
+    });
+
+    it('creates a buff named "Summoned"', async () => {
+        const manager = makeManagerWithMonster();
+        await manager._applySummonDurationBuff(5);
+        const [type, items] = manager.createdMonster.createEmbeddedDocuments.mock.calls[0];
+        expect(type).toBe('Item');
+        expect(items[0].name).toBe('Summoned');
+        expect(items[0].type).toBe('buff');
+    });
+
+    it('sets duration value to casterLevel as a string', async () => {
+        const manager = makeManagerWithMonster();
+        await manager._applySummonDurationBuff(7);
+        const items = manager.createdMonster.createEmbeddedDocuments.mock.calls[0][1];
+        expect(items[0].system.duration.value).toBe('7');
+    });
+
+    it('sets duration units to "round"', async () => {
+        const manager = makeManagerWithMonster();
+        await manager._applySummonDurationBuff(5);
+        const items = manager.createdMonster.createEmbeddedDocuments.mock.calls[0][1];
+        expect(items[0].system.duration.units).toBe('round');
+    });
+
+    it('creates buff as active', async () => {
+        const manager = makeManagerWithMonster();
+        await manager._applySummonDurationBuff(5);
+        const items = manager.createdMonster.createEmbeddedDocuments.mock.calls[0][1];
+        expect(items[0].system.active).toBe(true);
+    });
+});
+
 // ── _bumpConflictingInitiatives ───────────────────────────────────────────────
 
 describe('_bumpConflictingInitiatives', () => {

@@ -43,7 +43,10 @@ export class SummonManager {
         
         // Apply buffs
         await this._applyBuffs(html);
-        
+
+        // Apply duration buff
+        await this._applySummonDurationBuff(casterLevel.final);
+
         // Set disposition
         await this.createdMonster.update({
             "prototypeToken.disposition": this.summonerToken.document.disposition
@@ -51,11 +54,6 @@ export class SummonManager {
         
         // Spawn summons
         const spawnedTokens = await this._spawnSummons();
-        
-        // Set up duration tracking
-        if (spawnedTokens.firstToken) {
-            await this._setupDurationTracking(spawnedTokens.firstToken, casterLevel.final);
-        }
         
         // Set up combat
         if (game.combat && spawnedTokens.tokenIds.length > 0) {
@@ -403,53 +401,20 @@ export class SummonManager {
         };
     }
 
-    async _setupDurationTracking(firstToken, casterLevel) {
-        let expirationData = {};
-        
-        if (game.combat) {
-            // Combat Mode
-            const combat = game.combat;
-            const currentRound = combat.round;
-            const duration = casterLevel;
-            const expireRound = currentRound + duration;
-            
-            expirationData = {
-                mode: "combat",
-                actorId: this.createdMonster.id,
-                tokenId: firstToken.id,
-                expireRound,
-                combatId: combat.id,
-                created: Date.now()
-            };
-            
-            console.debug("[SummonMonster] Created combat expiration:", expirationData);
-        } else {
-            // Out of Combat Mode - Uses Core World Time
-            const seconds = casterLevel * 6;
-            const expireTime = game.time.worldTime + seconds;
-            
-            expirationData = {
-                mode: "calendar",
-                actorId: this.createdMonster.id,
-                tokenId: firstToken.id,
-                expireTime,
-                created: Date.now()
-            };
-            
-            console.debug(
-                "[SummonMonster] Created calendar expiration: worldTime",
-                game.time.worldTime,
-                "expireTime",
-                expirationData.expireTime,
-                "seconds",
-                seconds
-            );
-        }
-        
-        // Save flags
-        let prevExpirations = await this.summonerActor.getFlag("world", "summonExpirations") || [];
-        prevExpirations.push(expirationData);
-        await this.summonerActor.setFlag("world", "summonExpirations", prevExpirations);
+    async _applySummonDurationBuff(casterLevel) {
+        await this.createdMonster.setFlag("summons-for-pf1e", "isSummon", true);
+        await this.createdMonster.createEmbeddedDocuments("Item", [{
+            type: "buff",
+            name: "Summoned",
+            system: {
+                buffType: "temp",
+                duration: {
+                    value: String(casterLevel),
+                    units: "round"
+                },
+                active: true
+            }
+        }]);
     }
 
     async _setupCombat(spawnedTokenIds) {
