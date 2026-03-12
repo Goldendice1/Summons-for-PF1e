@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { SummonManager } from '../scripts/summon-manager.js';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { SummonManager, buildSummonChatContent } from '../scripts/summon-manager.js';
 
 // Minimal mock actor used to construct SummonManager instances
 function makeMockActor(spellbooks = {}, schoolConCL = 0) {
@@ -41,6 +41,7 @@ function makeHtml({
     harrow1Val = '',
     harrow2Val = '',
     conjuredArmorChecked = false,
+    summonCount = '1',
 } = {}) {
     return {
         find: (selector) => {
@@ -52,8 +53,9 @@ function makeHtml({
                 case '#reachCheck': return reachChecked ? [{ checked: true }] : [{ checked: false }];
                 case '#augmentCheck': return augmentChecked ? [{ checked: true }] : [{ checked: false }];
                 case '#harrow1': return harrow1Val !== '' ? [{ value: harrow1Val }] : [];
-                case '#harrow2': return harrow2Val !== '' ? [{ value: harrow2Val }] : [];
+                case '#harrow2': return [{ value: harrow2Val }];
                 case '#conjuredArmorCheck': return conjuredArmorChecked ? [{ checked: true }] : [{ checked: false }];
+                case '#summonCount': return { val: () => summonCount };
                 default: return [];
             }
         },
@@ -375,5 +377,207 @@ describe('_applyConjuredArmor', () => {
         const manager = makeManagerWithPsychic(10);
         await manager._applyConjuredArmor(makeHtml({ conjuredArmorChecked: false }));
         expect(manager.createdMonster.createEmbeddedDocuments).not.toHaveBeenCalled();
+    });
+});
+
+// ── _rollSummonCount ─────────────────────────────────────────────────────────
+
+describe('_rollSummonCount', () => {
+    it('returns roll result for a valid formula', async () => {
+        const manager = makeManager();
+        const result = await manager._rollSummonCount(makeHtml({ summonCount: '1d4' }));
+        expect(result.total).toBe(1);
+    });
+
+    it('defaults to formula "1" when Roll.validate returns false', async () => {
+        const origValidate = global.Roll.validate;
+        global.Roll.validate = () => false;
+        const manager = makeManager();
+        const result = await manager._rollSummonCount(makeHtml({ summonCount: 'bad formula' }));
+        expect(result.formula).toBe('1');
+        global.Roll.validate = origValidate;
+    });
+});
+
+// ── buildSummonChatContent ───────────────────────────────────────────────────
+
+describe('buildSummonChatContent', () => {
+    const roll = { formula: '1d4', total: 3 };
+
+    it('includes monster name', () => {
+        const html = buildSummonChatContent('Celestial Dog', roll, 5);
+        expect(html).toContain('Celestial Dog');
+    });
+
+    it('includes roll total', () => {
+        const html = buildSummonChatContent('Wolf', roll, 5);
+        expect(html).toContain('3');
+    });
+
+    it('includes caster level in rounds text', () => {
+        const html = buildSummonChatContent('Wolf', roll, 7);
+        expect(html).toContain('7 rounds');
+    });
+
+    it('includes roll formula in title attribute', () => {
+        const html = buildSummonChatContent('Wolf', roll, 5);
+        expect(html).toContain('1d4');
+    });
+});
+
+// ── _applyAugmentBuff ────────────────────────────────────────────────────────
+
+describe('_applyAugmentBuff', () => {
+    function makeManagerWithMonster() {
+        const manager = makeManager();
+        const buffMock = { update: vi.fn().mockResolvedValue(undefined) };
+        manager.createdMonster = {
+            name: 'Test Monster',
+            items: { find: vi.fn().mockReturnValue(buffMock) },
+            createEmbeddedDocuments: vi.fn().mockResolvedValue([]),
+            update: vi.fn().mockResolvedValue(undefined),
+            _buff: buffMock,
+        };
+        return manager;
+    }
+
+    it('checkbox unchecked → no buff created', async () => {
+        const manager = makeManagerWithMonster();
+        await manager._applyAugmentBuff(makeHtml({ augmentChecked: false }));
+        expect(manager.createdMonster.createEmbeddedDocuments).not.toHaveBeenCalled();
+    });
+
+    it('creates Augment Summoning buff item when checked', async () => {
+        const manager = makeManagerWithMonster();
+        await manager._applyAugmentBuff(makeHtml({ augmentChecked: true }));
+        const [type, items] = manager.createdMonster.createEmbeddedDocuments.mock.calls[0];
+        expect(type).toBe('Item');
+        expect(items[0].name).toBe('Augment Summoning');
+    });
+
+    it('applies +4 Str and +4 Con changes', async () => {
+        const manager = makeManagerWithMonster();
+        await manager._applyAugmentBuff(makeHtml({ augmentChecked: true }));
+        const changes = manager.createdMonster._buff.update.mock.calls[0][0]['system.changes'];
+        const strChange = changes.find(c => c.subTarget === 'str');
+        const conChange = changes.find(c => c.subTarget === 'con');
+        expect(strChange.formula).toBe('4');
+        expect(conChange.formula).toBe('4');
+    });
+
+    it('renames actor with (Augmented) suffix', async () => {
+        const manager = makeManagerWithMonster();
+        await manager._applyAugmentBuff(makeHtml({ augmentChecked: true }));
+        const updateArg = manager.createdMonster.update.mock.calls[0][0];
+        expect(updateArg.name).toContain('(Augmented)');
+    });
+});
+
+// ── _applyHarrowBuff ─────────────────────────────────────────────────────────
+
+describe('_applyHarrowBuff', () => {
+    function makeManagerWithMonster() {
+        const manager = makeManager();
+        const buffMock = { update: vi.fn().mockResolvedValue(undefined) };
+        manager.createdMonster = {
+            name: 'Test Monster',
+            items: { find: vi.fn().mockReturnValue(buffMock) },
+            createEmbeddedDocuments: vi.fn().mockResolvedValue([]),
+            _buff: buffMock,
+        };
+        return manager;
+    }
+
+    it('no buff when harrow1 is empty', async () => {
+        const manager = makeManagerWithMonster();
+        await manager._applyHarrowBuff(makeHtml({ harrow1Val: '' }));
+        expect(manager.createdMonster.createEmbeddedDocuments).not.toHaveBeenCalled();
+    });
+
+    it('single +6 bonus when harrow1 === harrow2', async () => {
+        const manager = makeManagerWithMonster();
+        await manager._applyHarrowBuff(makeHtml({ harrow1Val: 'str', harrow2Val: 'str' }));
+        const changes = manager.createdMonster._buff.update.mock.calls[0][0]['system.changes'];
+        expect(changes).toHaveLength(1);
+        expect(changes[0].formula).toBe('6');
+        expect(changes[0].subTarget).toBe('str');
+    });
+
+    it('single +6 bonus when harrow2 is empty', async () => {
+        const manager = makeManagerWithMonster();
+        await manager._applyHarrowBuff(makeHtml({ harrow1Val: 'dex', harrow2Val: '' }));
+        const changes = manager.createdMonster._buff.update.mock.calls[0][0]['system.changes'];
+        expect(changes).toHaveLength(1);
+        expect(changes[0].formula).toBe('6');
+    });
+
+    it('two +4 bonuses when harrow1 !== harrow2', async () => {
+        const manager = makeManagerWithMonster();
+        await manager._applyHarrowBuff(makeHtml({ harrow1Val: 'str', harrow2Val: 'dex' }));
+        const changes = manager.createdMonster._buff.update.mock.calls[0][0]['system.changes'];
+        expect(changes).toHaveLength(2);
+        expect(changes[0].formula).toBe('4');
+        expect(changes[1].formula).toBe('4');
+        expect(changes.map(c => c.subTarget)).toContain('str');
+        expect(changes.map(c => c.subTarget)).toContain('dex');
+    });
+});
+
+// ── _bumpConflictingInitiatives ───────────────────────────────────────────────
+
+describe('_bumpConflictingInitiatives', () => {
+    afterEach(() => {
+        global.game.combat = null;
+    });
+
+    it('no conflict → no combatants updated', async () => {
+        const manager = makeManager();
+        const other = { id: 'other', initiative: 3, update: vi.fn() };
+        global.game.combat = { combatants: [other] };
+        const newCombatants = [{ id: 'new1' }];
+        const summoner = { id: 'summoner', initiative: 5 };
+        await manager._bumpConflictingInitiatives(newCombatants, summoner, 5.01);
+        expect(other.update).not.toHaveBeenCalled();
+    });
+
+    it('single conflict → bumped by 0.01', async () => {
+        const manager = makeManager();
+        const conflicting = { id: 'other', initiative: 5.01, update: vi.fn() };
+        global.game.combat = { combatants: [conflicting] };
+        const newCombatants = [{ id: 'new1' }];
+        const summoner = { id: 'summoner', initiative: 5 };
+        await manager._bumpConflictingInitiatives(newCombatants, summoner, 5.01);
+        expect(conflicting.update).toHaveBeenCalledWith({ initiative: 5.02 });
+    });
+
+    it('chain conflict → each bumped to next available slot', async () => {
+        const manager = makeManager();
+        const a = { id: 'a', initiative: 5.01, update: vi.fn() };
+        const b = { id: 'b', initiative: 5.02, update: vi.fn() };
+        global.game.combat = { combatants: [a, b] };
+        const newCombatants = [{ id: 'new1' }];
+        const summoner = { id: 'summoner', initiative: 5 };
+        await manager._bumpConflictingInitiatives(newCombatants, summoner, 5.01);
+        expect(a.update).toHaveBeenCalledWith({ initiative: 5.02 });
+        expect(b.update).toHaveBeenCalledWith({ initiative: 5.03 });
+    });
+
+    it('summoner combatant is never bumped', async () => {
+        const manager = makeManager();
+        const summoner = { id: 'summoner', initiative: 5.01, update: vi.fn() };
+        global.game.combat = { combatants: [summoner] };
+        const newCombatants = [{ id: 'new1' }];
+        await manager._bumpConflictingInitiatives(newCombatants, summoner, 5.01);
+        expect(summoner.update).not.toHaveBeenCalled();
+    });
+
+    it('new summoned combatants are never bumped', async () => {
+        const manager = makeManager();
+        const newC = { id: 'new1', initiative: 5.01, update: vi.fn() };
+        global.game.combat = { combatants: [newC] };
+        const newCombatants = [newC];
+        const summoner = { id: 'summoner', initiative: 5 };
+        await manager._bumpConflictingInitiatives(newCombatants, summoner, 5.01);
+        expect(newC.update).not.toHaveBeenCalled();
     });
 });
