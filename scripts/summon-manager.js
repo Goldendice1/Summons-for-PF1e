@@ -620,7 +620,7 @@ export function buildSummonChatContent(monsterName, roll, casterLevel) {
                 <h3 class="actor-name">Summoning!</h3>
             </header>
             <div class="result-text">
-                <p><a class="inline-roll inline-result" title="${roll.formula}" data-roll="${encodeURI(JSON.stringify(roll))}">
+                <p><a class="inline-roll inline-result" title="${roll.formula}" data-roll="${encodeURIComponent(JSON.stringify(roll))}">
                     <i class="fas fa-dice-d20"></i> ${roll.total}
                 </a> ${monsterName} summoned for ${casterLevel} rounds.</p>
             </div>

@@ -74,6 +74,9 @@ export function validateSummonerTarget({ isGM, useUserLinkedActorOnly, actor, ch
                 return { valid: false, error: "No token chosen as summoner." };
             }
             summonerToken = controlledTokens[0];
+            if (!summonerToken?.actor) {
+                return { valid: false, error: "Selected token has no associated actor." };
+            }
             summonerActor = summonerToken.actor;
         } else {
             const tokens = placeableTokens.filter(t => t.actor && t.actor.id === summonerActor.id);

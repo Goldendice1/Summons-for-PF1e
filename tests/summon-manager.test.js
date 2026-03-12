@@ -390,12 +390,14 @@ describe('_rollSummonCount', () => {
     });
 
     it('defaults to formula "1" when Roll.validate returns false', async () => {
-        const origValidate = global.Roll.validate;
-        global.Roll.validate = () => false;
-        const manager = makeManager();
-        const result = await manager._rollSummonCount(makeHtml({ summonCount: 'bad formula' }));
-        expect(result.formula).toBe('1');
-        global.Roll.validate = origValidate;
+        const validateSpy = vi.spyOn(global.Roll, 'validate').mockReturnValue(false);
+        try {
+            const manager = makeManager();
+            const result = await manager._rollSummonCount(makeHtml({ summonCount: 'bad formula' }));
+            expect(result.formula).toBe('1');
+        } finally {
+            validateSpy.mockRestore();
+        }
     });
 });
 
