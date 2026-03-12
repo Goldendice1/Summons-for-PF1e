@@ -179,5 +179,10 @@
   "manifest": "https://github.com/Goldendice1/Summons-for-PF1e/releases/latest/download/module.json",
   "download": "https://github.com/Goldendice1/Summons-for-PF1e/releases/download/v1.0.0/summons-for-pf1e-v1.0.0.zip",
   "esmodules": ["scripts/main.js"],
-  "flags": {}
+  "flags": {},
+  "_comment": {
+    "_message": "For testing, use these instead:",
+    "_manifest": "https://raw.githubusercontent.com/Goldendice1/Summons-for-PF1e/example-feature-branch/module.json",
+    "_download": "https://github.com/Goldendice1/Summons-for-PF1e/archive/refs/heads/example-feature-branch.zip"
+  }
 }
