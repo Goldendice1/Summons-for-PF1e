@@ -7,6 +7,7 @@ import { SummonManager } from './summon-manager.js';
 export class SummonDialog extends Dialog {
     constructor(summonerActor, summonerToken, defaults = {}, options = {}, onSummon = null) {
         const config = getConfig();
+        let summonStarted = false;
 
         const dialogData = {
             title: "Summon Monster",
@@ -15,7 +16,10 @@ export class SummonDialog extends Dialog {
                 use: {
                     icon: '<i class="fas fa-dice-d20"></i>',
                     label: "Summon",
-                    callback: (html) => SummonDialog._onSummon(html, summonerActor, summonerToken, config, onSummon)
+                    callback: (html) => {
+                        summonStarted = true;
+                        SummonDialog._onSummon(html, summonerActor, summonerToken, config, onSummon);
+                    }
                 }
             },
             default: "use",
@@ -24,10 +28,11 @@ export class SummonDialog extends Dialog {
 
         super(dialogData, options);
         this._onSummonCallback = onSummon;
+        this._isSummonStarted = () => summonStarted;
     }
 
     close(options) {
-        if (this._onSummonCallback) this._onSummonCallback(null);
+        if (this._onSummonCallback && !this._isSummonStarted()) this._onSummonCallback(null);
         return super.close(options);
     }
 
