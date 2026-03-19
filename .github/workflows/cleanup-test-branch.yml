@@ -1,0 +1,21 @@
+name: Cleanup Test Branch
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Delete test branch
+        run: |
+          TEST_BRANCH="test/${{ github.head_ref }}"
+          if git ls-remote --exit-code origin "${TEST_BRANCH}" > /dev/null 2>&1; then
+            git push origin --delete "${TEST_BRANCH}"
+            echo "Deleted ${TEST_BRANCH}"
+          else
+            echo "No test branch found for ${TEST_BRANCH}, nothing to do"
+          fi

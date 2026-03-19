@@ -16,6 +16,16 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm test -- --coverage
+      - name: Check manifest points to production URL
+        run: |
+          EXPECTED="https://github.com/Goldendice1/Summons-for-PF1e/releases/latest/download/module.json"
+          ACTUAL=$(jq -r '.manifest' module.json)
+          if [ "$ACTUAL" != "$EXPECTED" ]; then
+            echo "❌ module.json manifest is set to a test URL: $ACTUAL"
+            echo "   Revert it to: $EXPECTED before merging."
+            exit 1
+          fi
+          echo "✅ manifest URL is correct for production"
       - name: Comment coverage on PR
         if: always()
         uses: davelosert/vitest-coverage-report-action@v2.9.3

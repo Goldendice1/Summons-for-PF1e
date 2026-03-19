@@ -1,0 +1,39 @@
+name: Update Test Manifest
+
+on:
+  push:
+    branches-ignore:
+      - main
+      - test/**
+
+jobs:
+  update-manifest:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Patch module.json and push to test branch
+        run: |
+          BRANCH="${GITHUB_REF_NAME}"
+          TEST_BRANCH="test/${BRANCH}"
+          MANIFEST="https://raw.githubusercontent.com/Goldendice1/Summons-for-PF1e/${TEST_BRANCH}/module.json"
+          DOWNLOAD="https://github.com/Goldendice1/Summons-for-PF1e/archive/refs/heads/${BRANCH}.zip"
+
+          CURRENT_VERSION=$(jq -r '.version' module.json)
+          MAJOR=$(echo "$CURRENT_VERSION" | cut -d. -f1)
+          MINOR=$(echo "$CURRENT_VERSION" | cut -d. -f2)
+          TEST_VERSION="${MAJOR}.${MINOR}.$(date +%Y%m%d%H%M%S)"
+
+          jq --arg manifest "$MANIFEST" \
+             --arg download "$DOWNLOAD" \
+             --arg version "$TEST_VERSION" \
+             '.manifest = $manifest | .download = $download | .version = $version' \
+             module.json > module.json.tmp && mv module.json.tmp module.json
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add module.json
+          git commit -m "chore: test manifest for ${BRANCH}"
+          git push origin HEAD:"${TEST_BRANCH}" --force
