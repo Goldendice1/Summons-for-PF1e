@@ -1,5 +1,19 @@
-import { describe, it, expect } from 'vitest';
-import { validateSummonerTarget } from '../scripts/main.js';
+import { describe, it, expect, vi } from 'vitest';
+import { validateSummonerTarget, openSummonDialog } from '../scripts/main.js';
+
+vi.mock('../scripts/settings.js', () => ({
+    getConfig: () => ({ useUserLinkedActorOnly: false }),
+    registerSettings: () => {},
+}));
+
+vi.mock('../scripts/summon-dialog.js', () => ({
+    SummonDialog: class {
+        constructor(actor, token, options, onSummon) {
+            this._onSummonCallback = onSummon;
+        }
+        render() {}
+    },
+}));
 
 function makeActor(id = 'actor-1', name = 'Summoner') {
     return { id, name };
@@ -84,5 +98,31 @@ describe('validateSummonerTarget — non-GM + useUserLinkedActorOnly=true path',
         const result = validateSummonerTarget({ ...basePlayer, actor, character: null, controlledTokens: [], placeableTokens: [], ownedTokens: [token] });
         expect(result.valid).toBe(true);
         expect(result.token).toBe(token);
+    });
+});
+
+// ── openSummonDialog — Promise return ─────────────────────────────────────────
+
+describe('openSummonDialog — Promise return', () => {
+    it('returns a Promise that resolves null when validation fails', async () => {
+        global.game.user.isGM = true;
+        global.canvas.tokens.controlled = [];
+        global.canvas.tokens.placeables = [];
+        global.canvas.tokens.ownedTokens = [];
+
+        const result = await openSummonDialog(null);
+        expect(result).toBeNull();
+    });
+
+    it('returns a Promise when validation succeeds', () => {
+        const actor = makeActor('actor-1');
+        const token = makeToken(actor);
+        global.game.user.isGM = true;
+        global.canvas.tokens.controlled = [token];
+        global.canvas.tokens.placeables = [token];
+        global.canvas.tokens.ownedTokens = [token];
+
+        const promise = openSummonDialog(actor);
+        expect(promise).toBeInstanceOf(Promise);
     });
 });

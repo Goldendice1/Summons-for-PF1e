@@ -43,6 +43,9 @@ function makeHtml({
     conjuredArmorChecked = false,
     conjurersFocusChecked = false,
     summonCount = '1',
+    sourceVal = 'pf1.summon-monster-1',
+    sourceLabel = 'Summon Monster I',
+    monsterVal = 'monster-abc',
 } = {}) {
     return {
         find: (selector) => {
@@ -58,6 +61,9 @@ function makeHtml({
                 case '#conjuredArmorCheck': return conjuredArmorChecked ? [{ checked: true }] : [{ checked: false }];
                 case '#conjurersFocusCheck': return conjurersFocusChecked ? [{ checked: true }] : [{ checked: false }];
                 case '#summonCount': return { val: () => summonCount };
+                case '#sourceSelect': return [{ value: sourceVal }];
+                case '#sourceSelect option:selected': return { text: () => sourceLabel };
+                case '#monsterSelect': return [{ value: monsterVal }];
                 default: return [];
             }
         },
@@ -656,3 +662,39 @@ describe('_bumpConflictingInitiatives', () => {
     });
 });
 
+// ── importMonster — return value ──────────────────────────────────────────────
+
+describe('importMonster — return value', () => {
+    let manager;
+
+    beforeEach(() => {
+        manager = makeManager();
+
+        vi.spyOn(manager, '_getOrCreateFolder').mockResolvedValue('folder-id');
+        vi.spyOn(manager, '_updatePermissions').mockResolvedValue();
+        vi.spyOn(manager, '_rollSummonCount').mockResolvedValue({ total: 1, formula: '1' });
+        vi.spyOn(manager, '_calculateCasterLevel').mockResolvedValue({ base: 5, final: 5 });
+        vi.spyOn(manager, '_calculateRange').mockReturnValue(35);
+        vi.spyOn(manager, '_applyTemplate').mockResolvedValue();
+        vi.spyOn(manager, '_applyBuffs').mockResolvedValue();
+        vi.spyOn(manager, '_spawnSummons').mockResolvedValue({ firstToken: null, tokenIds: [] });
+        vi.spyOn(manager, '_applySummonDurationBuff').mockResolvedValue();
+        vi.spyOn(manager, '_createChatMessage').mockReturnValue();
+
+        const mockMonsterDoc = { toObject: () => ({}) };
+        global.game.packs.get = vi.fn(() => ({ getDocument: vi.fn(async () => mockMonsterDoc) }));
+        global.Actor.create = vi.fn(async () => ({ id: 'wolf-1' }));
+        global.game.actors.get = vi.fn(() => ({
+            id: 'wolf-1',
+            name: 'Dire Wolf',
+            update: vi.fn(async () => {}),
+        }));
+    });
+
+    it('returns monsterName and spellList after successful summon', async () => {
+        const html = makeHtml({ sourceLabel: 'Summon Monster I' });
+        const result = await manager.importMonster(html);
+        expect(result.monsterName).toBe('Dire Wolf');
+        expect(result.spellList).toBe('Summon Monster I');
+    });
+});
