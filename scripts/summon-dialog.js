@@ -222,7 +222,13 @@ export class SummonDialog extends Dialog {
 
     static async _onSummon(html, summonerActor, summonerToken, config, onSummon = null) {
         const manager = new SummonManager(summonerActor, summonerToken, config);
-        const result = await manager.importMonster(html);
-        if (onSummon) onSummon(result ?? null);
+        try {
+            const result = await manager.importMonster(html);
+            if (onSummon) onSummon(result ?? null);
+        } catch (err) {
+            console.error(`[SummonMonster] Error during summoning:`, err);
+            ui.notifications.error(`Summoning failed: ${err.message}`);
+            if (onSummon) onSummon(null);
+        }
     }
 }

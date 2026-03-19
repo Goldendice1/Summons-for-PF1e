@@ -106,6 +106,9 @@ export function validateSummonerTarget({ isGM, useUserLinkedActorOnly, actor, ch
  * @param {Actor} actor - Optional actor to use as summoner
  * @param {object} defaults - Optional default values for dialog fields
  * @param {boolean} defaults.conjurersFocus - If true, default duration to minutes per level (Occultist Arcanist archetype) instead of rounds per level
+ * @returns {Promise<{monsterName: string, spellList: string}|null>} Resolves with the summoned
+ *   monster's name and the spell list it was summoned from, or null if the dialog was cancelled,
+ *   validation failed, or an error occurred during summoning.
  */
 export function openSummonDialog(actor = null, defaults = {}) {
     const config = getConfig();
