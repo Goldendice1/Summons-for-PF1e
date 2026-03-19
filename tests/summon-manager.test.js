@@ -678,7 +678,7 @@ describe('importMonster — return value', () => {
         vi.spyOn(manager, '_applyTemplate').mockResolvedValue();
         vi.spyOn(manager, '_applyBuffs').mockResolvedValue();
         vi.spyOn(manager, '_spawnSummons').mockResolvedValue({ firstToken: null, tokenIds: [] });
-        vi.spyOn(manager, '_setupDurationTracking').mockResolvedValue();
+        vi.spyOn(manager, '_applySummonDurationBuff').mockResolvedValue();
         vi.spyOn(manager, '_createChatMessage').mockReturnValue();
 
         const mockMonsterDoc = { toObject: () => ({}) };
