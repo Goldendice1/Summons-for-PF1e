@@ -11,7 +11,10 @@ export class ExpirationTracker {
             window._summonBuffExpirationHookId = Hooks.on("updateItem", (item, changes) => {
                 if (!game.user.isGM) return;
                 if (item.type !== "buff" || item.name !== "Summoned") return;
-                if (changes.system?.active !== false) return;
+                // Foundry item updates can use either nested ({ system: { active } })
+                // or dot-notation ({ "system.active": value }) change shapes.
+                const active = changes.system?.active ?? changes["system.active"];
+                if (active !== false) return;
 
                 const actor = item.parent;
                 if (!actor?.getFlag("summons-for-pf1e", "isSummon")) return;
@@ -19,7 +22,9 @@ export class ExpirationTracker {
                 // Defer deletion so PF1e can finish its own updateItem processing
                 // before the token is removed (otherwise PF1e errors accessing
                 // the synthetic actor's token after we've deleted it).
-                setTimeout(() => ExpirationTracker._deleteSummon(actor.id), 0);
+                setTimeout(() => ExpirationTracker._deleteSummon(actor.id).catch(err => {
+                    console.error("summons-for-pf1e | Error deleting expired summon:", err);
+                }), 0);
             });
         }
     }

@@ -68,6 +68,13 @@ describe('ExpirationTracker — buff expiration hook', () => {
         expect(global.ChatMessage.create).not.toHaveBeenCalled();
     });
 
+    it('triggers deletion when Foundry uses dot-notation change shape { "system.active": false }', async () => {
+        global.game.user.isGM = true;
+        updateItem(makeBuffItem(), { "system.active": false });
+        await vi.runAllTimersAsync();
+        expect(global.ChatMessage.create).toHaveBeenCalledOnce();
+    });
+
     it('ignores actors not flagged as isSummon', async () => {
         global.game.user.isGM = true;
         const item = makeBuffItem();
