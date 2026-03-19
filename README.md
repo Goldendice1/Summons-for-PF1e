@@ -115,6 +115,7 @@ git push origin v1.1.0
 ```
 
 The [release workflow](.github/workflows/release.yml) will automatically:
+
 1. Stamp the tag's version number and a versioned download URL into `module.json`
 2. Build a zip containing all module files (scripts, styles, lang, packs, etc.)
 3. Create a GitHub Release with the zip and `module.json` attached as assets
@@ -127,6 +128,10 @@ Foundry users will see the update the next time they check for module updates.
 npm ci
 npm test
 ```
+
+To test on Forge/Foundry, use:
+
+`https://raw.githubusercontent.com/Goldendice1/Summons-for-PF1e/test/{branch}/module.json`
 
 ## Credits
 
