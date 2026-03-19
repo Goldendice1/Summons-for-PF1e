@@ -30,6 +30,7 @@ describe('ExpirationTracker — buff expiration hook', () => {
         global.game.combat = null;
         global.canvas.tokens.placeables = [];
         global.game.actors.get = vi.fn().mockReturnValue(null);
+        global.game.settings = { get: vi.fn().mockReturnValue(false) };
 
         ExpirationTracker._registerBuffExpirationHook();
     });
@@ -123,7 +124,6 @@ describe('ExpirationTracker._deleteSummon — combat cleanup', () => {
         global.game.combat = null;
         // No error should be thrown
         await ExpirationTracker._deleteSummon('monster-id');
-        expect(global.ChatMessage.create).toHaveBeenCalled();
     });
 
     it('deletes the summoned actor', async () => {

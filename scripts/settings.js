@@ -87,6 +87,15 @@ export function registerSettings() {
         type: Boolean,
         default: SUMMON_CONFIG.enableHarrowedSummoning
     });
+
+    game.settings.register(MODULE_ID, "autoDeleteOnExpiration", {
+        name: "SUMMON.Settings.AutoDeleteOnExpiration.Name",
+        hint: "SUMMON.Settings.AutoDeleteOnExpiration.Hint",
+        scope: "world",
+        config: true,
+        type: Boolean,
+        default: false
+    });
 }
 
 /**
@@ -104,6 +113,7 @@ export function getConfig() {
         enableExtendMetamagic: game.settings.get(MODULE_ID, "enableExtendMetamagic"),
         enableReachMetamagic: game.settings.get(MODULE_ID, "enableReachMetamagic"),
         enableConjuredArmor: game.settings.get(MODULE_ID, "enableConjuredArmor"),
-        enableHarrowedSummoning: game.settings.get(MODULE_ID, "enableHarrowedSummoning")
+        enableHarrowedSummoning: game.settings.get(MODULE_ID, "enableHarrowedSummoning"),
+        autoDeleteOnExpiration: game.settings.get(MODULE_ID, "autoDeleteOnExpiration")
     };
 }
