@@ -568,11 +568,25 @@ describe('_applySummonDurationBuff', () => {
         expect(items[0].system.duration.value).toBe('7');
     });
 
-    it('sets duration units to "round"', async () => {
+    it('sets duration units to "round" by default', async () => {
         const manager = makeManagerWithMonster();
         await manager._applySummonDurationBuff(5);
         const items = manager.createdMonster.createEmbeddedDocuments.mock.calls[0][1];
         expect(items[0].system.duration.units).toBe('round');
+    });
+
+    it('conjurersFocus: sets duration units to "minute"', async () => {
+        const manager = makeManagerWithMonster();
+        await manager._applySummonDurationBuff(5, true);
+        const items = manager.createdMonster.createEmbeddedDocuments.mock.calls[0][1];
+        expect(items[0].system.duration.units).toBe('minute');
+    });
+
+    it('conjurersFocus: duration value is still casterLevel as a string', async () => {
+        const manager = makeManagerWithMonster();
+        await manager._applySummonDurationBuff(7, true);
+        const items = manager.createdMonster.createEmbeddedDocuments.mock.calls[0][1];
+        expect(items[0].system.duration.value).toBe('7');
     });
 
     it('creates buff as active', async () => {
@@ -642,62 +656,3 @@ describe('_bumpConflictingInitiatives', () => {
     });
 });
 
-// ── _setupDurationTracking ───────────────────────────────────────────────────
-
-describe('_setupDurationTracking', () => {
-    function makeToken(id = 'token-1') {
-        return { id };
-    }
-
-    function makeManagerWithFlags() {
-        const manager = makeManager();
-        manager.createdMonster = { id: 'monster-1' };
-        manager.summonerActor = {
-            ...manager.summonerActor,
-            getFlag: vi.fn().mockResolvedValue([]),
-            setFlag: vi.fn().mockResolvedValue(undefined),
-        };
-        return manager;
-    }
-
-    afterEach(() => {
-        global.game.combat = null;
-        global.game.time.worldTime = 0;
-    });
-
-    it('calendar mode: expireTime = worldTime + CL * 6 (rounds/level)', async () => {
-        global.game.time.worldTime = 100;
-        const manager = makeManagerWithFlags();
-        await manager._setupDurationTracking(makeToken(), 5, false);
-        const saved = manager.summonerActor.setFlag.mock.calls[0][2];
-        expect(saved[0].mode).toBe('calendar');
-        expect(saved[0].expireTime).toBe(100 + 5 * 6); // 130
-    });
-
-    it('calendar mode: expireTime = worldTime + CL * 60 (conjurersFocus)', async () => {
-        global.game.time.worldTime = 100;
-        const manager = makeManagerWithFlags();
-        await manager._setupDurationTracking(makeToken(), 5, true);
-        const saved = manager.summonerActor.setFlag.mock.calls[0][2];
-        expect(saved[0].mode).toBe('calendar');
-        expect(saved[0].expireTime).toBe(100 + 5 * 60); // 400
-    });
-
-    it('combat mode: expireRound = currentRound + CL (rounds/level)', async () => {
-        global.game.combat = { id: 'combat-1', round: 3 };
-        const manager = makeManagerWithFlags();
-        await manager._setupDurationTracking(makeToken(), 5, false);
-        const saved = manager.summonerActor.setFlag.mock.calls[0][2];
-        expect(saved[0].mode).toBe('combat');
-        expect(saved[0].expireRound).toBe(3 + 5); // 8
-    });
-
-    it('combat mode: expireRound = currentRound + CL * 10 (conjurersFocus)', async () => {
-        global.game.combat = { id: 'combat-1', round: 3 };
-        const manager = makeManagerWithFlags();
-        await manager._setupDurationTracking(makeToken(), 5, true);
-        const saved = manager.summonerActor.setFlag.mock.calls[0][2];
-        expect(saved[0].mode).toBe('combat');
-        expect(saved[0].expireRound).toBe(3 + 5 * 10); // 53
-    });
-});
