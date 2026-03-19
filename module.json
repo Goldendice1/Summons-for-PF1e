@@ -1,7 +1,7 @@
 {
   "id": "summons-for-pf1e",
   "title": "Summons for PF1e",
-  "version": "1.0.0",
+  "version": "2.0.20260319072032",
   "compatibility": {
     "minimum": "12",
     "verified": "13"
@@ -176,8 +176,8 @@
     }
   ],
   "url": "https://github.com/Goldendice1/Summons-for-PF1e",
-  "manifest": "https://github.com/Goldendice1/Summons-for-PF1e/releases/latest/download/module.json",
-  "download": "https://github.com/Goldendice1/Summons-for-PF1e/releases/download/v1.0.0/summons-for-pf1e-v1.0.0.zip",
+  "manifest": "https://raw.githubusercontent.com/Goldendice1/Summons-for-PF1e/test/expiration_option/module.json",
+  "download": "https://github.com/Goldendice1/Summons-for-PF1e/archive/refs/heads/expiration_option.zip",
   "languages": [
     {
       "lang": "en",
@@ -185,7 +185,9 @@
       "path": "lang/en.json"
     }
   ],
-  "esmodules": ["scripts/main.js"],
+  "esmodules": [
+    "scripts/main.js"
+  ],
   "flags": {},
   "_comment": {
     "_message": "For testing, use these instead:",
