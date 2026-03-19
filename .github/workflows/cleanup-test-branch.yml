@@ -7,14 +7,17 @@ on:
 jobs:
   cleanup:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
       - name: Delete test branch
         run: |
           TEST_BRANCH="test/${{ github.head_ref }}"
-          if git ls-remote --exit-code origin "${TEST_BRANCH}" > /dev/null 2>&1; then
-            git push origin --delete "${TEST_BRANCH}"
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            -H "Authorization: Bearer ${{ github.token }}" \
+            "https://api.github.com/repos/Goldendice1/Summons-for-PF1e/git/refs/heads/${TEST_BRANCH}")
+          if [ "$STATUS" = "200" ]; then
+            curl -s -X DELETE \
+              -H "Authorization: Bearer ${{ github.token }}" \
+              "https://api.github.com/repos/Goldendice1/Summons-for-PF1e/git/refs/heads/${TEST_BRANCH}"
             echo "Deleted ${TEST_BRANCH}"
           else
             echo "No test branch found for ${TEST_BRANCH}, nothing to do"
