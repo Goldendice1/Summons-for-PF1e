@@ -41,6 +41,7 @@ function makeHtml({
     harrow1Val = '',
     harrow2Val = '',
     conjuredArmorChecked = false,
+    conjurersFocusChecked = false,
     summonCount = '1',
 } = {}) {
     return {
@@ -55,6 +56,7 @@ function makeHtml({
                 case '#harrow1': return [{ value: harrow1Val }];
                 case '#harrow2': return [{ value: harrow2Val }];
                 case '#conjuredArmorCheck': return conjuredArmorChecked ? [{ checked: true }] : [{ checked: false }];
+                case '#conjurersFocusCheck': return conjurersFocusChecked ? [{ checked: true }] : [{ checked: false }];
                 case '#summonCount': return { val: () => summonCount };
                 default: return [];
             }
@@ -426,6 +428,12 @@ describe('buildSummonChatContent', () => {
         const html = buildSummonChatContent('Wolf', roll, 5);
         expect(html).toContain('title="1d4"');
     });
+
+    it('conjurersFocus: shows minutes instead of rounds', () => {
+        const html = buildSummonChatContent('Wolf', roll, 7, true);
+        expect(html).toContain('7 minutes');
+        expect(html).not.toContain('rounds');
+    });
 });
 
 // ── _applyAugmentBuff ────────────────────────────────────────────────────────
@@ -560,11 +568,25 @@ describe('_applySummonDurationBuff', () => {
         expect(items[0].system.duration.value).toBe('7');
     });
 
-    it('sets duration units to "round"', async () => {
+    it('sets duration units to "round" by default', async () => {
         const manager = makeManagerWithMonster();
         await manager._applySummonDurationBuff(5);
         const items = manager.createdMonster.createEmbeddedDocuments.mock.calls[0][1];
         expect(items[0].system.duration.units).toBe('round');
+    });
+
+    it('conjurersFocus: sets duration units to "minute"', async () => {
+        const manager = makeManagerWithMonster();
+        await manager._applySummonDurationBuff(5, true);
+        const items = manager.createdMonster.createEmbeddedDocuments.mock.calls[0][1];
+        expect(items[0].system.duration.units).toBe('minute');
+    });
+
+    it('conjurersFocus: duration value is still casterLevel as a string', async () => {
+        const manager = makeManagerWithMonster();
+        await manager._applySummonDurationBuff(7, true);
+        const items = manager.createdMonster.createEmbeddedDocuments.mock.calls[0][1];
+        expect(items[0].system.duration.value).toBe('7');
     });
 
     it('creates buff as active', async () => {
@@ -633,3 +655,4 @@ describe('_bumpConflictingInitiatives', () => {
         expect(newC.update).not.toHaveBeenCalled();
     });
 });
+

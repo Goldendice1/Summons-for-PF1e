@@ -15,7 +15,8 @@ export class SummonManager {
     async importMonster(html) {
         const selectedPack = html.find("#sourceSelect")[0].value;
         const selectedMonster = html.find("#monsterSelect")[0].value;
-        
+        const conjurersFocus = html.find("#conjurersFocusCheck")[0]?.checked ?? false;
+
         // Create destination folder
         const folderID = await this._getOrCreateFolder();
         
@@ -45,7 +46,7 @@ export class SummonManager {
         await this._applyBuffs(html);
 
         // Apply duration buff
-        await this._applySummonDurationBuff(casterLevel.final);
+        await this._applySummonDurationBuff(casterLevel.final, conjurersFocus);
 
         // Set disposition
         await this.createdMonster.update({
@@ -54,14 +55,14 @@ export class SummonManager {
         
         // Spawn summons
         const spawnedTokens = await this._spawnSummons();
-        
+
         // Set up combat
         if (game.combat && spawnedTokens.tokenIds.length > 0) {
             await this._setupCombat(spawnedTokens.tokenIds);
         }
-        
+
         // Create chat message
-        this._createChatMessage(rollResult, casterLevel.final);
+        this._createChatMessage(rollResult, casterLevel.final, conjurersFocus);
     }
 
     async _getOrCreateFolder() {
@@ -401,7 +402,7 @@ export class SummonManager {
         };
     }
 
-    async _applySummonDurationBuff(casterLevel) {
+    async _applySummonDurationBuff(casterLevel, conjurersFocus = false) {
         await this.createdMonster.setFlag("summons-for-pf1e", "isSummon", true);
         await this.createdMonster.createEmbeddedDocuments("Item", [{
             type: "buff",
@@ -410,7 +411,7 @@ export class SummonManager {
                 buffType: "temp",
                 duration: {
                     value: String(casterLevel),
-                    units: "round"
+                    units: conjurersFocus ? "minute" : "round"
                 },
                 active: true
             }
@@ -565,8 +566,8 @@ export class SummonManager {
         }
     }
 
-    _createChatMessage(roll, casterLevel) {
-        ChatMessage.create({ content: buildSummonChatContent(this.createdMonster.name, roll, casterLevel) });
+    _createChatMessage(roll, casterLevel, conjurersFocus = false) {
+        ChatMessage.create({ content: buildSummonChatContent(this.createdMonster.name, roll, casterLevel, conjurersFocus) });
     }
 }
 
@@ -592,7 +593,8 @@ function escapeHtml(str) {
  * @param {number} casterLevel
  * @returns {string}
  */
-export function buildSummonChatContent(monsterName, roll, casterLevel) {
+export function buildSummonChatContent(monsterName, roll, casterLevel, conjurersFocus = false) {
+    const durationText = conjurersFocus ? `${casterLevel} minutes` : `${casterLevel} rounds`;
     return `
         <div class="pf1 chat-card">
             <header class="card-header flexrow">
@@ -601,7 +603,7 @@ export function buildSummonChatContent(monsterName, roll, casterLevel) {
             <div class="result-text">
                 <p><a class="inline-roll inline-result" title="${escapeHtml(roll.formula)}" data-roll="${encodeURIComponent(JSON.stringify(roll))}">
                     <i class="fas fa-dice-d20"></i> ${roll.total}
-                </a> ${escapeHtml(monsterName)} summoned for ${casterLevel} rounds.</p>
+                </a> ${escapeHtml(monsterName)} summoned for ${durationText}.</p>
             </div>
         </div>`;
 }
