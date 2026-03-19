@@ -5,12 +5,12 @@ import { getConfig } from './settings.js';
 import { SummonManager } from './summon-manager.js';
 
 export class SummonDialog extends Dialog {
-    constructor(summonerActor, summonerToken, options = {}) {
+    constructor(summonerActor, summonerToken, defaults = {}, options = {}) {
         const config = getConfig();
-        
+
         const dialogData = {
             title: "Summon Monster",
-            content: SummonDialog._getContent(summonerActor, summonerToken, config),
+            content: SummonDialog._getContent(summonerActor, summonerToken, config, defaults),
             buttons: {
                 use: {
                     icon: '<i class="fas fa-dice-d20"></i>',
@@ -25,7 +25,7 @@ export class SummonDialog extends Dialog {
         super(dialogData, options);
     }
 
-    static _getContent(summonerActor, summonerToken, config) {
+    static _getContent(summonerActor, summonerToken, config, defaults = {}) {
         // Build pack options
         const packOptions = `<option value=""></option>` + game.packs
             .filter(p => p.documentName === "Actor" && 
@@ -97,6 +97,10 @@ export class SummonDialog extends Dialog {
                 <div class="form-group">
                     <label>Number to Summon:</label>
                     <input type="text" id="summonCount" placeholder="e.g. 1, 1d4+1">
+                </div>
+                <div class="form-group">
+                    <label>Conjurer's Focus (min/level):</label>
+                    <input type="checkbox" id="conjurersFocusCheck"${defaults.conjurersFocus ? " checked" : ""}>
                 </div>
                 ${config.enableAugmentSummoning ? `
                 <div class="form-group">

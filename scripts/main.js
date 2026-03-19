@@ -104,8 +104,10 @@ export function validateSummonerTarget({ isGM, useUserLinkedActorOnly, actor, ch
 /**
  * Open the summon dialog
  * @param {Actor} actor - Optional actor to use as summoner
+ * @param {object} defaults - Optional default values for dialog fields
+ * @param {boolean} defaults.conjurersFocus - If true, default duration to minutes per level (Occultist Arcanist archetype) instead of rounds per level
  */
-export function openSummonDialog(actor = null) {
+export function openSummonDialog(actor = null, defaults = {}) {
     const config = getConfig();
 
     const result = validateSummonerTarget({
@@ -123,7 +125,7 @@ export function openSummonDialog(actor = null) {
         return;
     }
 
-    const dialog = new SummonDialog(result.actor, result.token);
+    const dialog = new SummonDialog(result.actor, result.token, defaults);
     dialog.render(true);
 }
 
