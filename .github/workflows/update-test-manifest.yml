@@ -1,0 +1,43 @@
+name: Update Test Manifest
+
+on:
+  push:
+    branches-ignore:
+      - main
+
+jobs:
+  update-manifest:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Patch module.json for branch testing
+        id: patch
+        run: |
+          BRANCH="${GITHUB_REF_NAME}"
+          MANIFEST="https://raw.githubusercontent.com/Goldendice1/Summons-for-PF1e/${BRANCH}/module.json"
+          DOWNLOAD="https://github.com/Goldendice1/Summons-for-PF1e/archive/refs/heads/${BRANCH}.zip"
+
+          CURRENT_MANIFEST=$(jq -r '.manifest' module.json)
+          if [ "$CURRENT_MANIFEST" = "$MANIFEST" ]; then
+            echo "module.json already up to date, skipping"
+            echo "changed=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          jq --arg manifest "$MANIFEST" \
+             --arg download "$DOWNLOAD" \
+             '.manifest = $manifest | .download = $download' \
+             module.json > module.json.tmp && mv module.json.tmp module.json
+          echo "changed=true" >> $GITHUB_OUTPUT
+
+      - name: Commit patched module.json
+        if: steps.patch.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add module.json
+          git commit -m "chore: update test manifest for ${GITHUB_REF_NAME} [skip ci]"
+          git push
