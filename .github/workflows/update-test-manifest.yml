@@ -21,9 +21,12 @@ jobs:
           MANIFEST="https://raw.githubusercontent.com/Goldendice1/Summons-for-PF1e/${TEST_BRANCH}/module.json"
           DOWNLOAD="https://github.com/Goldendice1/Summons-for-PF1e/archive/refs/heads/${BRANCH}.zip"
 
-          CURRENT_VERSION=$(jq -r '.version' module.json)
-          MAJOR=$(echo "$CURRENT_VERSION" | cut -d. -f1)
-          MINOR=$(echo "$CURRENT_VERSION" | cut -d. -f2)
+          LATEST_TAG=$(curl -s -H "Authorization: Bearer ${{ github.token }}" \
+            "https://api.github.com/repos/Goldendice1/Summons-for-PF1e/releases/latest" \
+            | jq -r '.tag_name')
+          LATEST_VERSION="${LATEST_TAG#v}"
+          MAJOR=$(echo "$LATEST_VERSION" | cut -d. -f1)
+          MINOR=$(echo "$LATEST_VERSION" | cut -d. -f2)
           TEST_VERSION="${MAJOR}.${MINOR}.$(date +%Y%m%d%H%M%S)"
 
           jq --arg manifest "$MANIFEST" \
