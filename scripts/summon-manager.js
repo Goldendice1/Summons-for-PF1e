@@ -566,8 +566,8 @@ export class SummonManager {
         }
     }
 
-    _createChatMessage(roll, casterLevel) {
-        ChatMessage.create({ content: buildSummonChatContent(this.createdMonster.name, roll, casterLevel) });
+    _createChatMessage(roll, casterLevel, conjurersFocus = false) {
+        ChatMessage.create({ content: buildSummonChatContent(this.createdMonster.name, roll, casterLevel, conjurersFocus) });
     }
 }
 
@@ -593,7 +593,8 @@ function escapeHtml(str) {
  * @param {number} casterLevel
  * @returns {string}
  */
-export function buildSummonChatContent(monsterName, roll, casterLevel) {
+export function buildSummonChatContent(monsterName, roll, casterLevel, conjurersFocus = false) {
+    const durationText = conjurersFocus ? `${casterLevel} minutes` : `${casterLevel} rounds`;
     return `
         <div class="pf1 chat-card">
             <header class="card-header flexrow">
@@ -602,7 +603,7 @@ export function buildSummonChatContent(monsterName, roll, casterLevel) {
             <div class="result-text">
                 <p><a class="inline-roll inline-result" title="${escapeHtml(roll.formula)}" data-roll="${encodeURIComponent(JSON.stringify(roll))}">
                     <i class="fas fa-dice-d20"></i> ${roll.total}
-                </a> ${escapeHtml(monsterName)} summoned for ${casterLevel} rounds.</p>
+                </a> ${escapeHtml(monsterName)} summoned for ${durationText}.</p>
             </div>
         </div>`;
 }

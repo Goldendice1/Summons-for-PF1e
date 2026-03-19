@@ -41,6 +41,7 @@ function makeHtml({
     harrow1Val = '',
     harrow2Val = '',
     conjuredArmorChecked = false,
+    conjurersFocusChecked = false,
     summonCount = '1',
 } = {}) {
     return {
@@ -55,6 +56,7 @@ function makeHtml({
                 case '#harrow1': return [{ value: harrow1Val }];
                 case '#harrow2': return [{ value: harrow2Val }];
                 case '#conjuredArmorCheck': return conjuredArmorChecked ? [{ checked: true }] : [{ checked: false }];
+                case '#conjurersFocusCheck': return conjurersFocusChecked ? [{ checked: true }] : [{ checked: false }];
                 case '#summonCount': return { val: () => summonCount };
                 default: return [];
             }
@@ -426,6 +428,12 @@ describe('buildSummonChatContent', () => {
         const html = buildSummonChatContent('Wolf', roll, 5);
         expect(html).toContain('title="1d4"');
     });
+
+    it('conjurersFocus: shows minutes instead of rounds', () => {
+        const html = buildSummonChatContent('Wolf', roll, 7, true);
+        expect(html).toContain('7 minutes');
+        expect(html).not.toContain('rounds');
+    });
 });
 
 // ── _applyAugmentBuff ────────────────────────────────────────────────────────
@@ -631,5 +639,65 @@ describe('_bumpConflictingInitiatives', () => {
         const summoner = { id: 'summoner', initiative: 5 };
         await manager._bumpConflictingInitiatives(newCombatants, summoner, 5.01);
         expect(newC.update).not.toHaveBeenCalled();
+    });
+});
+
+// ── _setupDurationTracking ───────────────────────────────────────────────────
+
+describe('_setupDurationTracking', () => {
+    function makeToken(id = 'token-1') {
+        return { id };
+    }
+
+    function makeManagerWithFlags() {
+        const manager = makeManager();
+        manager.createdMonster = { id: 'monster-1' };
+        manager.summonerActor = {
+            ...manager.summonerActor,
+            getFlag: vi.fn().mockResolvedValue([]),
+            setFlag: vi.fn().mockResolvedValue(undefined),
+        };
+        return manager;
+    }
+
+    afterEach(() => {
+        global.game.combat = null;
+        global.game.time.worldTime = 0;
+    });
+
+    it('calendar mode: expireTime = worldTime + CL * 6 (rounds/level)', async () => {
+        global.game.time.worldTime = 100;
+        const manager = makeManagerWithFlags();
+        await manager._setupDurationTracking(makeToken(), 5, false);
+        const saved = manager.summonerActor.setFlag.mock.calls[0][2];
+        expect(saved[0].mode).toBe('calendar');
+        expect(saved[0].expireTime).toBe(100 + 5 * 6); // 130
+    });
+
+    it('calendar mode: expireTime = worldTime + CL * 60 (conjurersFocus)', async () => {
+        global.game.time.worldTime = 100;
+        const manager = makeManagerWithFlags();
+        await manager._setupDurationTracking(makeToken(), 5, true);
+        const saved = manager.summonerActor.setFlag.mock.calls[0][2];
+        expect(saved[0].mode).toBe('calendar');
+        expect(saved[0].expireTime).toBe(100 + 5 * 60); // 400
+    });
+
+    it('combat mode: expireRound = currentRound + CL (rounds/level)', async () => {
+        global.game.combat = { id: 'combat-1', round: 3 };
+        const manager = makeManagerWithFlags();
+        await manager._setupDurationTracking(makeToken(), 5, false);
+        const saved = manager.summonerActor.setFlag.mock.calls[0][2];
+        expect(saved[0].mode).toBe('combat');
+        expect(saved[0].expireRound).toBe(3 + 5); // 8
+    });
+
+    it('combat mode: expireRound = currentRound + CL * 10 (conjurersFocus)', async () => {
+        global.game.combat = { id: 'combat-1', round: 3 };
+        const manager = makeManagerWithFlags();
+        await manager._setupDurationTracking(makeToken(), 5, true);
+        const saved = manager.summonerActor.setFlag.mock.calls[0][2];
+        expect(saved[0].mode).toBe('combat');
+        expect(saved[0].expireRound).toBe(3 + 5 * 10); // 53
     });
 });
