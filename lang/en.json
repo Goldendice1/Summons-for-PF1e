@@ -36,6 +36,10 @@
       "EnableHarrowedSummoning": {
         "Name": "Enable Harrowed Summoning",
         "Hint": "Show Harrowed Summoning options in the summon dialog"
+      },
+      "AutoDeleteOnExpiration": {
+        "Name": "Auto-Delete on Expiration",
+        "Hint": "If enabled, summoned tokens are deleted automatically when their duration expires. If disabled, a chat message with a Delete button is posted instead, letting the GM choose when to remove the token."
       }
     }
   }

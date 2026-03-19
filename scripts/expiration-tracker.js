@@ -1,9 +1,12 @@
 /**
  * Handles expiration tracking for summoned creatures
  */
+import { MODULE_ID } from './config.js';
+
 export class ExpirationTracker {
     static initialize() {
         this._registerBuffExpirationHook();
+        this._registerChatButtonHook();
     }
 
     static _registerBuffExpirationHook() {
@@ -19,14 +22,49 @@ export class ExpirationTracker {
                 const actor = item.parent;
                 if (!actor?.getFlag("summons-for-pf1e", "isSummon")) return;
 
-                // Defer deletion so PF1e can finish its own updateItem processing
-                // before the token is removed (otherwise PF1e errors accessing
-                // the synthetic actor's token after we've deleted it).
-                setTimeout(() => ExpirationTracker._deleteSummon(actor.id).catch(err => {
-                    console.error("summons-for-pf1e | Error deleting expired summon:", err);
-                }), 0);
+                const autoDelete = game.settings.get(MODULE_ID, "autoDeleteOnExpiration");
+
+                if (autoDelete) {
+                    // Defer deletion so PF1e can finish its own updateItem processing
+                    // before the token is removed (otherwise PF1e errors accessing
+                    // the synthetic actor's token after we've deleted it).
+                    setTimeout(() => ExpirationTracker._deleteSummon(actor.id).then(() => {
+                        ExpirationTracker._postExpiredMessage(actor.id, false);
+                    }).catch(err => {
+                        console.error("summons-for-pf1e | Error deleting expired summon:", err);
+                    }), 0);
+                } else {
+                    // Post a chat message with a button for the GM to manually delete.
+                    setTimeout(() => {
+                        ExpirationTracker._postExpiredMessage(actor.id, true);
+                    }, 0);
+                }
             });
         }
+    }
+
+    static _registerChatButtonHook() {
+        Hooks.on("renderChatMessage", (_message, html) => {
+            html.find(".summon-expire-delete").click(async (event) => {
+                if (!game.user.isGM) return;
+                const btn = event.currentTarget;
+                btn.disabled = true;
+                const actorId = btn.dataset.actorId;
+                await ExpirationTracker._deleteSummon(actorId).catch(err => {
+                    console.error("summons-for-pf1e | Error deleting expired summon:", err);
+                    btn.disabled = false;
+                });
+            });
+        });
+    }
+
+    static _postExpiredMessage(actorId, withButton) {
+        const buttonHtml = withButton
+            ? `<div class="card-buttons"><button class="summon-expire-delete" data-actor-id="${actorId}">Delete Summon</button></div>`
+            : "";
+        ChatMessage.create({
+            content: `<div class="pf1 chat-card"><header class="card-header flexrow"><h3 class="actor-name">Summon Expired</h3></header><div class="result-text"><p>The summon duration has expired.</p></div>${buttonHtml}</div>`
+        });
     }
 
     static async _deleteSummon(actorId) {
@@ -68,9 +106,5 @@ export class ExpirationTracker {
         if (game.combat) {
             await game.combat.setupTurns();
         }
-
-        ChatMessage.create({
-            content: `<div class="pf1 chat-card"><header class="card-header flexrow"><h3 class="actor-name">Summon Expired</h3></header><div class="result-text"><p>The summon duration has expired.</p></div></div>`
-        });
     }
 }
