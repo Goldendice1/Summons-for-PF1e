@@ -29,9 +29,11 @@ export class SummonDialog extends Dialog {
         super(dialogData, options);
         this._onSummonCallback = onSummon;
         this._isSummonStarted = () => summonStarted;
+        console.log('[SummonMonster] SummonDialog constructor complete.');
     }
 
     close(options) {
+        console.log(`[SummonMonster] SummonDialog.close() called: _isSummonStarted=${this._isSummonStarted?.()}, stack=`, new Error().stack.split('\n')[2]);
         if (this._onSummonCallback && !this._isSummonStarted()) this._onSummonCallback(null);
         return super.close(options);
     }

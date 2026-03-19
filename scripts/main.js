@@ -127,9 +127,15 @@ export function openSummonDialog(actor = null, defaults = {}) {
 
     return new Promise((resolve) => {
         let settled = false;
-        const once = (value) => { if (!settled) { settled = true; resolve(value); } };
+        const once = (value) => {
+            console.log(`[SummonMonster] once() called: settled=${settled}, value=`, value);
+            if (!settled) { settled = true; resolve(value); }
+        };
+        console.log('[SummonMonster] Creating SummonDialog...');
         const dialog = new SummonDialog(result.actor, result.token, defaults, {}, once);
+        console.log('[SummonMonster] Calling dialog.render(true)...');
         dialog.render(true);
+        console.log('[SummonMonster] dialog.render() returned.');
     });
 }
 
