@@ -63,6 +63,11 @@ export class SummonManager {
 
         // Create chat message
         this._createChatMessage(rollResult, casterLevel.final, conjurersFocus);
+
+        return {
+            monsterName: this.createdMonster.name,
+            spellList: html.find("#sourceSelect option:selected").text()
+        };
     }
 
     async _getOrCreateFolder() {

@@ -5,7 +5,7 @@ import { getConfig } from './settings.js';
 import { SummonManager } from './summon-manager.js';
 
 export class SummonDialog extends Dialog {
-    constructor(summonerActor, summonerToken, defaults = {}, options = {}) {
+    constructor(summonerActor, summonerToken, defaults = {}, options = {}, onSummon = null) {
         const config = getConfig();
 
         const dialogData = {
@@ -15,7 +15,7 @@ export class SummonDialog extends Dialog {
                 use: {
                     icon: '<i class="fas fa-dice-d20"></i>',
                     label: "Summon",
-                    callback: (html) => SummonDialog._onSummon(html, summonerActor, summonerToken, config)
+                    callback: (html) => SummonDialog._onSummon(html, summonerActor, summonerToken, config, onSummon)
                 }
             },
             default: "use",
@@ -23,6 +23,12 @@ export class SummonDialog extends Dialog {
         };
 
         super(dialogData, options);
+        this._onSummonCallback = onSummon;
+    }
+
+    close(options) {
+        if (this._onSummonCallback) this._onSummonCallback(null);
+        return super.close(options);
     }
 
     static _getContent(summonerActor, summonerToken, config, defaults = {}) {
@@ -209,8 +215,9 @@ export class SummonDialog extends Dialog {
         }).trigger("change");
     }
 
-    static async _onSummon(html, summonerActor, summonerToken, config) {
+    static async _onSummon(html, summonerActor, summonerToken, config, onSummon = null) {
         const manager = new SummonManager(summonerActor, summonerToken, config);
-        await manager.importMonster(html);
+        const result = await manager.importMonster(html);
+        if (onSummon) onSummon(result ?? null);
     }
 }

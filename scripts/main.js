@@ -122,11 +122,15 @@ export function openSummonDialog(actor = null, defaults = {}) {
 
     if (!result.valid) {
         ui.notifications.warn(result.error);
-        return;
+        return Promise.resolve(null);
     }
 
-    const dialog = new SummonDialog(result.actor, result.token, defaults);
-    dialog.render(true);
+    return new Promise((resolve) => {
+        let settled = false;
+        const once = (value) => { if (!settled) { settled = true; resolve(value); } };
+        const dialog = new SummonDialog(result.actor, result.token, defaults, {}, once);
+        dialog.render(true);
+    });
 }
 
 
