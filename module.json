@@ -151,6 +151,17 @@
         "PLAYER": "OBSERVER",
         "ASSISTANT": "OWNER"
       }
+    },
+    {
+      "name": "summon-misc",
+      "label": "Miscellaneous",
+      "path": "packs/summon-misc",
+      "type": "Actor",
+      "system": "pf1",
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      }
     }
   ],
   "packFolders": [
@@ -169,7 +180,8 @@
         "summon-monster-vi",
         "summon-monster-vii",
         "summon-monster-viii",
-        "summon-monster-ix"
+        "summon-monster-ix",
+        "summon-misc"
       ],
       "color": null,
       "folders": []
