@@ -1,0 +1,352 @@
+/**
+ * Macro 1: Monster Knowledge Data Harvester (Parenthetical Fix)
+ * Stores lore data on the SOURCE ACTOR (Sidebar) so it applies to all tokens.
+ */
+
+const controlledTokens = canvas.tokens.controlled;
+if (controlledTokens.length !== 1) {
+    return ui.notifications.warn("Please select exactly one token linked to the source Actor.");
+}
+
+const token = controlledTokens[0];
+
+// Get the Source Actor from the sidebar
+const actor = game.actors.get(token.document.actorId);
+
+if (!actor) {
+    return ui.notifications.error("Could not find the source actor for this token. Is it a temporary token without a sheet?");
+}
+
+// --- Helper: Parse Description Trait ---
+function parseDescriptionTrait(traitName) {
+    const item = actor.items.find(i => i.name === traitName);
+    if (!item) return { appearance: "", basic: "", full: "" };
+
+    const div = document.createElement("div");
+    div.innerHTML = item.system.description.value;
+    
+    let appearance = "";
+    let basicDesc = "";
+    let fullDesc = "";
+    
+    let firstIsItalic = false;
+
+    const paragraphs = Array.from(div.children);
+
+    if (paragraphs.length === 0) return { appearance: "", basic: div.innerText, full: "" };
+    
+    if (paragraphs[0].querySelector('em') || paragraphs[0].querySelector('i')) {
+        appearance = paragraphs[0].outerHTML;
+        firstIsItalic = true;
+    }
+
+    let finishedBasic = false;
+    for (let i = firstIsItalic ? 1 : 0; i < paragraphs.length; i++) {
+        const p = paragraphs[i];
+        
+        if (!finishedBasic) {
+            basicDesc += p.outerHTML;
+            if (!p.querySelector('em') && !p.querySelector('i')) {
+                finishedBasic = true;
+            }
+        } else {
+            fullDesc += p.outerHTML;
+        }
+    }
+    
+    // Combine appearance and the initial basic description.
+    const combinedBasic = appearance + basicDesc;
+
+    return { appearance, basic: combinedBasic, full: fullDesc };
+}
+
+// --- Helper: List Trait Formatting ---
+function formatListTrait(trait, labelMap) {
+    if (!trait) return [];
+    
+    const map = labelMap || {};
+    let value = [];
+    
+    if (trait.total) { 
+        value = (trait.total instanceof Set) ? Array.from(trait.total) : (Array.isArray(trait.total) ? trait.total : []);
+    } else if (Array.isArray(trait.value)) {
+        value = trait.value;
+    } else if (trait.value instanceof Set) {
+        value = Array.from(trait.value);
+    } else if (trait.value) {
+        value = [trait.value];
+    }
+    
+    let list = value.map(k => {
+        return map[k] || k;
+    });
+
+    if (trait.custom && typeof trait.custom === 'string' && trait.custom.trim()) {
+        list.push(trait.custom.trim());
+    }
+    return list.join(", ");
+}
+
+// --- Helper: Structured Resistance Formatting ---
+function formatResistance(trait) {
+    const resistances = Array.isArray(trait.value) ? trait.value : [];
+    const damageMap = CONFIG.PF1.damageTypes || {};
+
+    const parts = resistances.map(t => {
+        const amt = t.amount || 0;
+        const typesArray = Array.isArray(t.types) ? t.types : [];
+        const mappedTypes = typesArray.map(typeKey => damageMap[typeKey] || typeKey).join(" and ");
+
+        if (amt === 0) return null;
+
+        const output = (trait === actor.system.traits.dr)
+            ? `${amt} / ${mappedTypes}`
+            : `${amt} ${mappedTypes}`;
+
+        return output.trim();
+    }).filter(s => s);
+
+    // Include the free-text "Special" box (trait.custom). sbc dumps a resistance here
+    // whenever the stat block uses a damage-type key the pf1 module doesn't recognize
+    // (e.g. "electric" instead of "electricity"), so it never lands in trait.value and
+    // would otherwise be silently dropped. Preserved verbatim since it's free text.
+    if (trait.custom && typeof trait.custom === 'string' && trait.custom.trim()) {
+        parts.push(trait.custom.trim());
+    }
+
+    return parts.length ? parts.join(", ") : null;
+}
+
+// 1. Text Parsing
+const descTrait = parseDescriptionTrait("Description");
+
+const typeName = actor.system.traits.creatureTypes.names[0];
+
+// 2. Senses
+const perception = actor.system.skills.per.mod;
+const traits = actor.system.traits;
+const sData = traits.senses || {};
+const sensesArray = [];
+
+// Range-based senses (check > 0)
+if (sData.bs?.total > 0) sensesArray.push(`Blindsight ${sData.bs.total} ft.`);
+if (sData.bse?.total > 0) sensesArray.push(`Blindsense ${sData.bse.total} ft.`);
+if (sData.dv?.total > 0) sensesArray.push(`Darkvision ${sData.dv.total} ft.`);
+if (sData.ls?.total > 0) sensesArray.push(`Lifesense ${sData.ls.total} ft.`);
+if (sData.sc?.total > 0) sensesArray.push(`Scent ${sData.sc.total} ft.`);
+if (sData.tr?.total > 0) sensesArray.push(`Tremorsense ${sData.tr.total} ft.`);
+if (sData.ts?.total > 0) sensesArray.push(`True Seeing ${sData.ts.total} ft.`);
+
+// Boolean/Enabled senses (check for truthy value)
+if (sData.ll?.enabled) sensesArray.push(`Low-Light Vision`);
+if (sData.si) sensesArray.push(`See Invisibility`);
+if (sData.sid) sensesArray.push(`See in Darkness`);
+
+// Custom string
+if (sData.custom) sensesArray.push(sData.custom);
+
+const sensesCombined = sensesArray.join(", ") || "None";
+
+
+// 3. Weaknesses / Resistances
+const defensesArray = [];
+
+if (traits.dr) {
+    const drList = formatResistance(traits.dr);
+    if (drList) defensesArray.push(`DR: ${drList}`);
+}
+if (traits.eres) {
+    const eresList = formatResistance(traits.eres);
+    if (eresList) defensesArray.push(`Energy Res: ${eresList}`);
+}
+if (traits.cres) {
+    const cresText = typeof traits.cres === 'string' ? traits.cres : (traits.cres.value || "");
+    if (cresText) defensesArray.push(`Condition Res: ${cresText}`);
+}
+if (traits.ci) {
+    const ciList = formatListTrait(traits.ci, CONFIG.PF1.conditionTypes);
+    if (ciList) defensesArray.push(`Condition Immunities: ${ciList}`);
+}
+if (traits.di) {
+    const diList = formatListTrait(traits.di, CONFIG.PF1.damageTypes);
+    if (diList) defensesArray.push(`Damage Immunities: ${diList}`);
+}
+if (traits.dv) {
+    const dvList = formatListTrait(traits.dv, CONFIG.PF1.damageTypes);
+    if (dvList) defensesArray.push(`Vulnerabilities: ${dvList}`);
+}
+if (traits.regen) defensesArray.push(`Regeneration: ${traits.regen}`);
+if (traits.fastHealing) defensesArray.push(`Fast Healing: ${traits.fastHealing}`);
+
+const defenses = defensesArray.join("<br>") || "None";
+
+
+// 4. Feats
+const featList = actor.items.filter(i => 
+    i.type === "feat" && 
+    i.subType === "feat"
+)
+.map(f => f.name)
+.join(", ");
+
+
+// 5. Skills
+const skillList = Object.entries(actor.system.skills)
+    .filter(([key, sk]) => {
+        const abilityMod = actor.system.abilities[sk.ability]?.mod || 0;
+        return sk.mod > abilityMod || sk.rank > 0;
+    })
+    .map(([key, sk]) => `${CONFIG.PF1.skills[key] || key}: +${sk.mod}`)
+    .join(", ");
+
+
+// 6. Spells / SLAs
+let spellsAndSlas = "None listed.";
+
+const spellItems = actor.items.filter(i => i.type === 'spell');
+
+if (spellItems.length > 0) {
+    const spellGroups = {
+        'Constant': [],
+        'At will': [],
+        'Other': [] 
+    };
+    
+    let casterLevel = actor.system.attributes.spells?.spellbooks?.primary?.cl?.total || 0; 
+    if (casterLevel === 0) {
+        casterLevel = Math.max(1, ...actor.itemTypes.class.map(c => c.system.levels || 0));
+    }
+    
+    spellItems.forEach(spell => {
+        const uses = spell.system.uses;
+        let name = spell.name;
+        
+        let key = 'Other';
+
+        // 1. CONSTANT
+        if (name.toLowerCase().startsWith("constant")) {
+             key = 'Constant';
+             name = name.replace(/^Constant:\s*/i, '').trim(); 
+        } 
+        // 2. AT WILL
+        else if (spell.system.atWill || uses.value === 'at will' || uses.per === 'at will') {
+             key = 'At will';
+        }
+        // 3. X/DAY (Check uses.max directly)
+        else if (uses && uses.max) {
+            const maxUses = Number(uses.max); 
+            if (maxUses > 0) {
+                key = `${maxUses}/day`;
+                if (!spellGroups[key]) spellGroups[key] = [];
+            }
+        }
+        
+        // Add to group
+        if (spellGroups[key]) {
+            spellGroups[key].push(name);
+        } else if (key !== 'Other') {
+             spellGroups[key] = [name];
+        } else {
+             spellGroups['Other'].push(name);
+        }
+    });
+
+    let spellsOutput = `<strong>Spell-Like Abilities</strong> (CL ${casterLevel}th)<br>`;
+
+    const fixedOrder = ['Constant', 'At will'];
+    
+    const dynamicKeys = Object.keys(spellGroups).filter(k => 
+        !fixedOrder.includes(k) && 
+        k.endsWith('/day') && 
+        spellGroups[k].length > 0
+    ).sort((a, b) => {
+        const numA = parseInt(a.split('/')[0]);
+        const numB = parseInt(b.split('/')[0]);
+        return numB - numA;
+    });
+
+    const sortedKeys = [...fixedOrder, ...dynamicKeys, 'Other'].filter(k => 
+        spellGroups[k] && spellGroups[k].length > 0
+    );
+    
+    sortedKeys.forEach(key => {
+        const spellList = spellGroups[key].sort().join(', ');
+        
+        let formattedKey = key;
+        if (key === 'Other') {
+            formattedKey = 'Variable Uses';
+        }
+
+        spellsOutput += `<strong>${formattedKey}</strong>—${spellList}<br>`;
+    });
+
+    spellsAndSlas = spellsOutput;
+}
+
+
+// 7. Stats
+const ac = actor.system.attributes.ac;
+const hp = actor.system.attributes.hp;
+const bab = actor.system.attributes.bab.total;
+const saves = `Fort +${actor.system.attributes.savingThrows.fort.total}, Ref +${actor.system.attributes.savingThrows.ref.total}, Will +${actor.system.attributes.savingThrows.will.total}`;
+const abils = Object.entries(actor.system.abilities).map(([k, v]) => `${k.toUpperCase()} ${v.total}`).join(", ");
+const statBlock = `
+    <strong>AC:</strong> ${ac.normal.total}, Touch ${ac.touch.total}, Flat-footed ${ac.flatFooted.total}<br>
+    <strong>HP:</strong> ${hp.max} (${actor.system.attributes.hd.total} HD)<br>
+    <strong>Saves:</strong> ${saves}<br>
+    <strong>BAB:</strong> +${bab}<br>
+    <strong>Scores:</strong> ${abils}
+`;
+
+// 8. Ecology / Languages
+const ecology = actor.items.find(i => i.name === "Ecology")?.system.description.value || "Unknown";
+const languages = formatListTrait({total: actor.system.traits.languages?.total}, CONFIG.PF1.languages);
+
+
+// 9. Abilities (Misc Features)
+const abilitySubtypes = ["racial", "misc"];
+const excludedItemNames = ["Ecology", "Tactics", "Description", "Miscellaneous Notes"];
+
+const miscFeats = actor.items.filter(i => 
+    i.type === "feat" && 
+    abilitySubtypes.includes(i.subType) && 
+    !excludedItemNames.includes(i.name)
+).map(i => {
+    // 📢 NEW: Move parenthetical info to description
+    const parenMatch = i.name.match(/\s*(\([^)]*\))/);
+    let cleanName = i.name;
+    let desc = i.system.description.value;
+
+    if (parenMatch) {
+        // Remove from name
+        cleanName = i.name.replace(parenMatch[0], '').trim();
+        // Add to description (bolded for visibility)
+        desc = `<strong>${parenMatch[1]}</strong><br>${desc}`;
+    }
+
+    return { name: cleanName, desc: desc };
+});
+
+// Construct Data Object
+const loreData = {
+    appearance: descTrait.appearance || "No distinct appearance noted.",
+    basic: {
+        name: actor.name,
+        alignment: actor.system.details.alignment,
+        type: typeName,
+        desc: descTrait.basic || "No description available."
+    },
+    fullDesc: descTrait.full || "No further description available.",
+    senses: `<strong>Perception:</strong> +${perception}<br><strong>Senses:</strong> ${sensesCombined}`,
+    defenses: defenses || "None",
+    feats: featList || "None",
+    skills: skillList || "None",
+    spells: spellsAndSlas, 
+    stats: statBlock,
+    ecology: `<strong>Languages:</strong> ${languages}<br><strong>Ecology:</strong><br>${ecology}`,
+    abilities: miscFeats
+};
+
+// Store data on the Source Actor
+await actor.setFlag("world", "monsterLore", loreData);
+ui.notifications.info(`Lore data stored successfully on Source Actor: ${actor.name}`);
