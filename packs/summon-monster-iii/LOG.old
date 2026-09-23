@@ -1,7 +1,14 @@
-2026/02/12-19:00:58.857 4440 Recovering log #304
-2026/02/12-19:00:58.870 4440 Delete type=0 #304
-2026/02/12-19:00:58.871 4440 Delete type=3 #302
-2026/02/12-19:32:48.101 5574 Level-0 table #309: started
-2026/02/12-19:32:48.101 5574 Level-0 table #309: 0 bytes OK
-2026/02/12-19:32:48.104 5574 Delete type=0 #307
-2026/02/12-19:32:48.109 5574 Manual compaction at level-0 from '!actors!08IWh3tFmJgYaIyf' @ 72057594037927935 : 1 .. '!actors.items!vljHnunOo2nmpZrY.tRQNfwHkuN6ETUTh' @ 0 : 0; will stop at (end)
+2026/09/23-00:10:53.048 b170 Recovering log #312
+2026/09/23-00:10:53.051 b170 Delete type=0 #312
+2026/09/23-00:10:53.051 b170 Delete type=3 #310
+2026/09/23-00:10:53.061 b380 Level-0 table #317: started
+2026/09/23-00:10:53.064 b380 Level-0 table #317: 135628 bytes OK
+2026/09/23-00:10:53.065 b380 Delete type=0 #315
+2026/09/23-00:10:53.066 b380 Manual compaction at level-0 from '\x00' @ 72057594037927935 : 1 .. '\xef\xbf\xbf' @ 0 : 0; will stop at '!actors.items!l8mdmA2YfzBK6gQC.ZBIslRT5xEvtC8FR' @ 379 : 1
+2026/09/23-00:10:53.066 b380 Compacting 1@0 + 1@1 files
+2026/09/23-00:10:53.072 b380 Generated table #318@0: 206 keys, 371835 bytes
+2026/09/23-00:10:53.072 b380 Compacted 1@0 + 1@1 files => 371835 bytes
+2026/09/23-00:10:53.073 b380 compacted to: files[ 0 1 0 0 0 0 0 ]
+2026/09/23-00:10:53.073 b380 Delete type=2 #231
+2026/09/23-00:10:53.074 b380 Delete type=2 #317
+2026/09/23-00:10:53.074 b380 Manual compaction at level-0 from '!actors.items!l8mdmA2YfzBK6gQC.ZBIslRT5xEvtC8FR' @ 379 : 1 .. '\xef\xbf\xbf' @ 0 : 0; will stop at (end)
