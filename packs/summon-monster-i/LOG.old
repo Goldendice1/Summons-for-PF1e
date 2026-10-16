@@ -1,16 +1,14 @@
-2026/09/23-00:10:52.989 b170 Recovering log #353
-2026/09/23-00:10:52.993 b170 Delete type=0 #12
-2026/09/23-00:10:52.993 b170 Delete type=0 #353
-2026/09/23-00:10:52.993 b170 Delete type=3 #10
-2026/09/23-00:10:52.993 b170 Delete type=3 #351
-2026/09/23-00:10:53.002 b380 Level-0 table #358: started
-2026/09/23-00:10:53.005 b380 Level-0 table #358: 111304 bytes OK
-2026/09/23-00:10:53.006 b380 Delete type=0 #356
-2026/09/23-00:10:53.007 b380 Manual compaction at level-0 from '\x00' @ 72057594037927935 : 1 .. '\xef\xbf\xbf' @ 0 : 0; will stop at '!actors.items!qC8yD5zmj8Gi7oC3.v9SxZOO53edDP4Sq' @ 206 : 1
-2026/09/23-00:10:53.007 b380 Compacting 1@0 + 1@1 files
-2026/09/23-00:10:53.011 b380 Generated table #359@0: 104 keys, 216616 bytes
-2026/09/23-00:10:53.012 b380 Compacted 1@0 + 1@1 files => 216616 bytes
-2026/09/23-00:10:53.012 b380 compacted to: files[ 0 1 0 0 0 0 0 ]
-2026/09/23-00:10:53.012 b380 Delete type=2 #272
-2026/09/23-00:10:53.013 b380 Delete type=2 #358
-2026/09/23-00:10:53.013 b380 Manual compaction at level-0 from '!actors.items!qC8yD5zmj8Gi7oC3.v9SxZOO53edDP4Sq' @ 206 : 1 .. '\xef\xbf\xbf' @ 0 : 0; will stop at (end)
+2026/10/16-00:40:09.471 8598 Recovering log #361
+2026/10/16-00:40:09.475 8598 Delete type=0 #361
+2026/10/16-00:40:09.475 8598 Delete type=3 #360
+2026/10/16-00:40:09.489 9e84 Level-0 table #365: started
+2026/10/16-00:40:09.492 9e84 Level-0 table #365: 37637 bytes OK
+2026/10/16-00:40:09.493 9e84 Delete type=0 #363
+2026/10/16-00:40:09.493 9e84 Manual compaction at level-0 from '\x00' @ 72057594037927935 : 1 .. '\xef\xbf\xbf' @ 0 : 0; will stop at '!actors!qC8yD5zmj8Gi7oC3' @ 251 : 1
+2026/10/16-00:40:09.493 9e84 Compacting 1@0 + 1@1 files
+2026/10/16-00:40:09.499 9e84 Generated table #366@0: 104 keys, 216616 bytes
+2026/10/16-00:40:09.499 9e84 Compacted 1@0 + 1@1 files => 216616 bytes
+2026/10/16-00:40:09.500 9e84 compacted to: files[ 0 1 0 0 0 0 0 ]
+2026/10/16-00:40:09.501 9e84 Delete type=2 #359
+2026/10/16-00:40:09.501 9e84 Delete type=2 #365
+2026/10/16-00:40:09.501 9e84 Manual compaction at level-0 from '!actors!qC8yD5zmj8Gi7oC3' @ 251 : 1 .. '\xef\xbf\xbf' @ 0 : 0; will stop at (end)

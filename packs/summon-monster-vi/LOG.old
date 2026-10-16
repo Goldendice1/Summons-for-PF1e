@@ -1,14 +1,14 @@
-2026/09/23-00:10:53.154 9290 Recovering log #297
-2026/09/23-00:10:53.158 9290 Delete type=0 #297
-2026/09/23-00:10:53.158 9290 Delete type=3 #295
-2026/09/23-00:10:53.175 b380 Level-0 table #302: started
-2026/09/23-00:10:53.180 b380 Level-0 table #302: 239448 bytes OK
-2026/09/23-00:10:53.181 b380 Delete type=0 #300
-2026/09/23-00:10:53.181 b380 Manual compaction at level-0 from '\x00' @ 72057594037927935 : 1 .. '\xef\xbf\xbf' @ 0 : 0; will stop at '!actors.items!rXm3wLSEmzQELJJ4.yUKAFl6fkSyzPFly' @ 988 : 1
-2026/09/23-00:10:53.181 b380 Compacting 1@0 + 1@1 files
-2026/09/23-00:10:53.192 b380 Generated table #303@0: 485 keys, 822318 bytes
-2026/09/23-00:10:53.192 b380 Compacted 1@0 + 1@1 files => 822318 bytes
-2026/09/23-00:10:53.193 b380 compacted to: files[ 0 1 0 0 0 0 0 ]
-2026/09/23-00:10:53.193 b380 Delete type=2 #226
-2026/09/23-00:10:53.193 b380 Delete type=2 #302
-2026/09/23-00:10:53.193 b380 Manual compaction at level-0 from '!actors.items!rXm3wLSEmzQELJJ4.yUKAFl6fkSyzPFly' @ 988 : 1 .. '\xef\xbf\xbf' @ 0 : 0; will stop at (end)
+2026/10/16-00:40:09.686 23e4 Recovering log #305
+2026/10/16-00:40:09.691 23e4 Delete type=0 #305
+2026/10/16-00:40:09.691 23e4 Delete type=3 #304
+2026/10/16-00:40:09.717 9e84 Level-0 table #309: started
+2026/10/16-00:40:09.719 9e84 Level-0 table #309: 30319 bytes OK
+2026/10/16-00:40:09.719 9e84 Delete type=0 #307
+2026/10/16-00:40:09.721 9e84 Manual compaction at level-0 from '\x00' @ 72057594037927935 : 1 .. '\xef\xbf\xbf' @ 0 : 0; will stop at '!actors!rXm3wLSEmzQELJJ4' @ 1023 : 1
+2026/10/16-00:40:09.721 9e84 Compacting 1@0 + 1@1 files
+2026/10/16-00:40:09.733 9e84 Generated table #310@0: 485 keys, 822318 bytes
+2026/10/16-00:40:09.733 9e84 Compacted 1@0 + 1@1 files => 822318 bytes
+2026/10/16-00:40:09.734 9e84 compacted to: files[ 0 1 0 0 0 0 0 ]
+2026/10/16-00:40:09.735 9e84 Delete type=2 #303
+2026/10/16-00:40:09.735 9e84 Delete type=2 #309
+2026/10/16-00:40:09.736 9e84 Manual compaction at level-0 from '!actors!rXm3wLSEmzQELJJ4' @ 1023 : 1 .. '\xef\xbf\xbf' @ 0 : 0; will stop at (end)
